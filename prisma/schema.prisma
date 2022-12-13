@@ -60,6 +60,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   role          Role      @default(USER)
+  guides        Guide[]
 }
 
 model VerificationToken {
@@ -68,4 +69,67 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Operator {
+  id     String  @id
+  name   String
+  rarity Int
+  guides Guide[]
+}
+
+model Stage {
+  stageCode String  @id
+  guides    Guide[]
+  event     Event   @relation(fields: [eventId], references: [id])
+  eventId   String
+
+  @@index([eventId])
+}
+
+model Tag {
+  id     String  @id @default(cuid())
+  name   String
+  guides Guide[]
+}
+
+model Creator {
+  id     String  @id
+  name   String
+  guides Guide[]
+}
+
+enum Status {
+  APPROVED
+  PENDING
+  REJECTED
+}
+
+model Guide {
+  id            String     @id
+  title         String
+  stage         Stage      @relation(fields: [stageCode], references: [stageCode])
+  stageCode     String
+  operators     Operator[]
+  tags          Tag[]
+  submittedBy   User       @relation(fields: [submittedById], references: [id])
+  submittedById String
+  status        Status
+  submittedAt   DateTime
+  uploadedBy    Creator    @relation(fields: [uploadedById], references: [id])
+  uploadedById  String
+
+  @@index([stageCode])
+  @@index([submittedById])
+  @@index([uploadedById])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  startDate   DateTime
+  endDate     DateTime
+  description String
+  stages      Stage[]
+  imageUrl    String
 }
