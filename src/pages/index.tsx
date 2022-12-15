@@ -1,26 +1,44 @@
 import { type NextPage } from "next";
-import { signIn, signOut, useSession } from "next-auth/react";
+import Image from "next/image";
 import { trpc } from "../utils/trpc";
+import { env } from "../env/client.mjs";
 
 const Home: NextPage = () => {
-  // const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
-  const session = useSession();
-  // const data = trpc.guide.testPrisma.useQuery("KyoStinV");
   const data = trpc.guide.getRecentGuides.useQuery(1);
 
-  if (session.status === "loading") return (<p>Loading...</p>);
+  if (data.isLoading) return <p>Loading...</p>;
 
   return (
     <>
       <h1 className="text-2xl font-bold">Hello World</h1>
-      {session.status === "authenticated" ? (<><p>{session.data.user?.name}. { session.data.user?.role }</p><br /><button onClick={ () => signOut()}>Sign Out</button></>) : (<><p>Not Logged In</p><br/><button onClick={() => signIn("google")}>Sign In</button></>)}
-      {data.status === "success" ? data.data.map((guide) => {
-        return (
-          <div key={guide.id}>
-            <p>{guide.title}</p>
-          </div>
-        )
-      }) : <p>error</p>}
+
+      {data.status === "success" ? (
+        data.data.map((guide) => {
+          return (
+            <div key={guide.id}>
+              <p>{guide.title}</p>
+              <p>Operators: </p>
+              <ul>
+                {guide.operators.map((operator) => {
+                  return (
+                    <li key={operator.id}>
+                      <Image
+                        src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
+                        alt={operator.id}
+                        width={100}
+                        height={100}
+                      />
+                      {operator.name}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })
+      ) : (
+        <p>error</p>
+      )}
     </>
   );
 };

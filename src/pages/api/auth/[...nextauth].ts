@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
           },
           select: {
             role: true,
-          }
+          },
         });
         if (dbUser) session.user.role = dbUser.role ?? "USER";
       }
