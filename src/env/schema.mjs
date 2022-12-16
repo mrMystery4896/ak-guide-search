@@ -2,9 +2,7 @@
 import { z } from "zod";
 
 /**
- * Specify your server-side environment variables schema here.
- * This way you can ensure the app isn't built with invalid env vars.
- */
+ * Specify your server-side environment variables schema here.  * This way you can ensure the app isn't built with invalid env vars.  */
 export const serverSchema = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "test", "production"]),
@@ -22,6 +20,11 @@ export const serverSchema = z.object({
   GOOGLE_CLIENT_ID: z.string(),
   GOOGLE_CLIENT_SECRET: z.string(),
   GOOGLE_API_KEY: z.string(),
+  GOOGLE_CLOUD_STORAGE_PROJECT_ID: z.string(),
+  GOOGLE_CLOUD_STORAGE_CREDENTIALS_CLIENT_EMAIL: z.string(),
+  GOOGLE_CLOUD_STORAGE_CREDENTIALS_PRIVATE_KEY: z.string(),
+  GOOGLE_CLOUD_STORAGE_CREDENTIALS_CLIENT_ID: z.string(),
+  GOOGLE_CLOUD_STORAGE_CREDENTIALS_TYPE: z.string(),
 });
 
 /**

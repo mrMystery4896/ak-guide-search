@@ -5,6 +5,9 @@ import { type Session } from "next-auth";
 import { getServerAuthSession } from "../common/get-server-auth-session";
 import { prisma } from "../db/client";
 
+import { Storage } from "@google-cloud/storage/build/src/storage";
+import { env } from "../../env/server.mjs";
+
 type CreateContextOptions = {
   session: Session | null;
 };
@@ -15,9 +18,20 @@ type CreateContextOptions = {
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  **/
 export const createContextInner = async (opts: CreateContextOptions) => {
+  const storage = new Storage({
+    projectId: env.GOOGLE_CLOUD_STORAGE_PROJECT_ID,
+    credentials: {
+      client_email: env.GOOGLE_CLOUD_STORAGE_CREDENTIALS_CLIENT_EMAIL,
+      private_key: env.GOOGLE_CLOUD_STORAGE_CREDENTIALS_PRIVATE_KEY,
+      client_id: env.GOOGLE_CLOUD_STORAGE_CREDENTIALS_CLIENT_ID,
+      type: env.GOOGLE_CLOUD_STORAGE_CREDENTIALS_TYPE,
+    },
+  });
+
   return {
     session: opts.session,
     prisma,
+    storage,
   };
 };
 
