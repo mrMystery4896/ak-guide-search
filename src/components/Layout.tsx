@@ -9,12 +9,10 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const session = useSession();
 
-  if (session.status === "loading") return <p>Loading</p>;
-
   return (
     <>
-      <Navbar />
-      <main>{children}</main>
+      <Navbar session={session} />
+      <main className=" px-6 md:px-16">{children}</main>
     </>
   );
 };

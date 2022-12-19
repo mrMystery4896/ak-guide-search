@@ -2,7 +2,11 @@
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ["Nunito", "sans-serif"],
+      },
+    },
     colors: {
       gray: {
         100: "#9CA3AF",

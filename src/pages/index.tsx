@@ -21,6 +21,7 @@ const Home: NextPage = () => {
                 alt={guide.title}
                 height={480}
                 width={640}
+                loading="eager"
               />
               <p>Operators: </p>
               <ul>

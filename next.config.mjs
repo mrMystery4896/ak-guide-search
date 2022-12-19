@@ -14,7 +14,11 @@ const config = {
     defaultLocale: "en",
   },
   images: {
-    domains: ["storage.googleapis.com", "i.ytimg.com"],
+    domains: [
+      "storage.googleapis.com",
+      "i.ytimg.com",
+      "lh3.googleusercontent.com",
+    ],
   },
 };
 export default config;
