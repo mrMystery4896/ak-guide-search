@@ -18,23 +18,17 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ session }) => {
   return (
     <nav className="flex items-center justify-between px-6 py-3 md:px-16 md:py-7">
-      <Link
-        href="/"
-        className="hidden align-middle text-2xl font-bold md:block"
-      >
+      <Link href="/" className="hidden text-2xl font-bold md:block">
         AKGuideSearch
       </Link>
-      <Link
-        href="/"
-        className="block h-full align-middle text-xl font-bold md:hidden"
-      >
+      <Link href="/" className="block h-full text-xl font-bold md:hidden">
         AKGS
       </Link>
       <div className="flex">
         <div className="relative">
           <Input
             placeholder="Search..."
-            className="w-[40vw] rounded-l-md rounded-r-none"
+            className="max-h-10 w-[30vw] rounded-l-md rounded-r-none md:w-[40vw]"
           />
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 md:pr-4">
             <button className="h-full">
@@ -46,12 +40,12 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
           <FaFilter />
         </Button>
       </div>
-      <div className="h-10">
+      <div className="h-8 w-8 md:h-10 md:w-10">
         {session.status === "loading" ? (
           <LoadingSpinner />
         ) : session.status === "authenticated" ? (
           <>
-            <Menu as="div" className="relative">
+            <Menu as="div" className="relative md:h-10">
               <Menu.Button className="focus:outline-none">
                 {/* user profile picture round as button */}
                 {session.data.user?.image ? (

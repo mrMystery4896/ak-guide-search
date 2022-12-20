@@ -13,7 +13,7 @@ const Input: React.FC<InputProps> = ({
     <div className="flex flex-col">
       <input
         className={twMerge(
-          `rounded-md border border-gray-300 bg-gray-300 px-3 py-1 placeholder:text-gray-100 focus:outline-none md:py-2 ${
+          `rounded-md border border-gray-300 bg-gray-300 px-3 py-1 placeholder:text-sm placeholder:text-gray-100 focus:outline-none md:py-2 placeholder:md:text-base ${
             errorMessage ? "border-red" : "focus:border-primary"
           }`,
           className

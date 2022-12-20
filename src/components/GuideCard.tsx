@@ -32,8 +32,8 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
   };
 
   return (
-    <div className="relative flex h-[180px] flex-col items-start overflow-hidden rounded-md bg-gray-300 md:flex-row md:rounded-xl xl:h-[270px]">
-      <div className="relative h-[180px] min-w-[320px] overflow-hidden xl:h-[270px] xl:min-w-[480px]">
+    <div className="relative flex w-full flex-col items-start overflow-hidden rounded-md bg-gray-300 md:h-[180px] md:flex-row md:rounded-xl xl:h-[270px]">
+      <div className="relative min-w-full overflow-hidden pb-[56%] md:h-[180px] md:min-w-[320px] md:pb-0 xl:h-[270px] xl:min-w-[480px]">
         <Image
           src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/guide-thumbnail/${guide.id}.png`}
           alt={guide.title}
@@ -44,7 +44,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
           loading="eager"
         />
       </div>
-      <div className="flex h-[180px] w-auto flex-col justify-between p-4 xl:h-[270px] xl:justify-start xl:gap-4 xl:p-6">
+      <div className="flex min-h-fit flex-col gap-4 p-4 md:h-[180px] md:w-auto md:justify-between xl:h-[270px] xl:justify-start xl:gap-8 xl:p-6">
         <div>
           <h3 className="truncate text-xl font-bold xl:text-2xl">
             {guide.title}
@@ -66,7 +66,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                 <li
                   key={operator.id}
                   className={
-                    `relative h-6 w-6 overflow-hidden rounded-full md:h-10 md:w-10 lg:h-12 lg:w-12` +
+                    `relative h-10 w-10 overflow-hidden rounded-full md:h-10 md:w-10 xl:h-12 xl:w-12` +
                     ` ${translateRarityToClassName(operator.rarity)}`
                   }
                 >
