@@ -1,7 +1,6 @@
 import { type NextPage } from "next";
-import Image from "next/image";
 import { trpc } from "../utils/trpc";
-import { env } from "../env/client.mjs";
+import GuideCard from "../components/GuideCard";
 
 const Home: NextPage = () => {
   const data = trpc.guide.getRecentGuides.useQuery(3);
@@ -10,41 +9,17 @@ const Home: NextPage = () => {
 
   return (
     <>
-      <h1 className="text-2xl font-bold">Hello World</h1>
-      {data.status === "success" ? (
-        data.data.map((guide) => {
-          return (
-            <div key={guide.id}>
-              <p>{guide.title}</p>
-              <Image
-                src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/guide-thumbnail/${guide.id}.png`}
-                alt={guide.title}
-                height={480}
-                width={640}
-                loading="eager"
-              />
-              <p>Operators: </p>
-              <ul>
-                {guide.operators.map((operator) => {
-                  return (
-                    <li key={operator.id}>
-                      <Image
-                        src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
-                        alt={operator.id}
-                        width={100}
-                        height={100}
-                      />
-                      {operator.name}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          );
-        })
-      ) : (
-        <p>error</p>
-      )}
+      <h2 className="mb-2 text-2xl font-bold">Recently Added</h2>
+      <div className="flex min-w-full flex-col gap-2 md:gap-4">
+        {/* <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"> */}
+        {data.status === "success" ? (
+          data.data.map((guide) => {
+            return <GuideCard guide={guide} key={guide.id} />;
+          })
+        ) : (
+          <p>error</p>
+        )}
+      </div>
     </>
   );
 };
