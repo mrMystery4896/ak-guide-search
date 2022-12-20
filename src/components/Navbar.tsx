@@ -68,7 +68,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                   </div>
                 )}
               </Menu.Button>
-              <Menu.Items className="absolute z-10 flex -translate-x-1/2 flex-col rounded-md bg-gray-300 p-1 drop-shadow-md">
+              <Menu.Items className="absolute right-0 z-10 flex flex-col rounded-md bg-gray-300 p-1 drop-shadow-md md:translate-x-1/3">
                 <Menu.Item>
                   {({ active, close }) => {
                     return (
