@@ -11,8 +11,19 @@ import { HiArrowsUpDown } from "react-icons/hi2";
 import Tooltip from "../components/Tooltip";
 import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { prisma } from "../server/db/client";
 
-const SubmitGuide: NextPage = () => {
+interface SubmitGuideProps {
+  operatorList: Operator[];
+  tagList: Tag[];
+  eventList: Event[];
+}
+
+const SubmitGuide: NextPage<SubmitGuideProps> = ({
+  operatorList,
+  tagList,
+  eventList,
+}) => {
   const videoUrlInputRef = useRef<HTMLInputElement>(null);
 
   const [selectedOperators, setSelectedOperators] = useState<Operator[]>([]);
@@ -20,9 +31,6 @@ const SubmitGuide: NextPage = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
 
-  const operatorListData = trpc.operator.getAllOperators.useQuery();
-  const tagListData = trpc.tag.getAllTags.useQuery();
-  const eventListData = trpc.event.getAllEvents.useQuery();
   const stageListData = trpc.stage.getStageforEvent.useQuery(
     selectedEvent?.id ?? null
   );
@@ -123,48 +131,12 @@ const SubmitGuide: NextPage = () => {
             </div>
           );
         })}
-        {operatorListData.data ? (
-          <SelectOperatorDropdown
-            operators={operatorListData.data.filter(
-              (operator) => !selectedOperators.includes(operator)
-            )}
-            setSelectedOperators={setSelectedOperators}
-          />
-        ) : (
-          <>
-            <LoadingSpinner />
-          </>
-        )}
-        {/* <select
-          onChange={(e) => {
-            setSelectedOperators([
-              ...selectedOperators,
-              operatorListData.data?.find(
-                (operator) => operator.id === e.target.value
-              ) as Operator,
-            ]);
-            e.target.value = "";
-          }}
-          defaultValue={""}
-          className="w-64"
-        >
-          <option value="" disabled>
-            Select Operator
-          </option>
-          {operatorListData.data ? (
-            operatorListData.data
-              .filter((operator) => !selectedOperators.includes(operator))
-              .map((operator) => {
-                return (
-                  <option key={operator.id} value={operator.id}>
-                    {operator.name}
-                  </option>
-                );
-              })
-          ) : (
-            <option disabled>Loading...</option>
+        <SelectOperatorDropdown
+          operators={operatorList.filter(
+            (operator) => !selectedOperators.includes(operator)
           )}
-        </select> */}
+          setSelectedOperators={setSelectedOperators}
+        />
         <br />
         {selectedTags.map((tag) => {
           return (
@@ -188,7 +160,7 @@ const SubmitGuide: NextPage = () => {
           onChange={(e) => {
             setSelectedTags([
               ...selectedTags,
-              tagListData.data?.find((tag) => tag.id === e.target.value) as Tag,
+              tagList.find((tag) => tag.id === e.target.value) as Tag,
             ]);
             e.target.value = "";
           }}
@@ -198,19 +170,15 @@ const SubmitGuide: NextPage = () => {
           <option value="" disabled>
             Select Tag
           </option>
-          {tagListData.data ? (
-            tagListData.data
-              .filter((tag) => !selectedTags.includes(tag))
-              .map((tag) => {
-                return (
-                  <option key={tag.id} value={tag.id}>
-                    {tag.name}
-                  </option>
-                );
-              })
-          ) : (
-            <option disabled>Loading...</option>
-          )}
+          {tagList
+            .filter((tag) => !selectedTags.includes(tag))
+            .map((tag) => {
+              return (
+                <option key={tag.id} value={tag.id}>
+                  {tag.name}
+                </option>
+              );
+            })}
         </select>
         <br />
         {selectedEvent ? (
@@ -224,7 +192,7 @@ const SubmitGuide: NextPage = () => {
         <select
           // value={selectedEvent?.id ?? ""}
           onChange={(e) => {
-            const selectedEventObject = eventListData.data?.find(
+            const selectedEventObject = eventList.find(
               (event) => event.id === e.target.value
             );
             setSelectedEvent(selectedEventObject ?? null);
@@ -235,17 +203,13 @@ const SubmitGuide: NextPage = () => {
           <option value="" disabled>
             Select Event
           </option>
-          {eventListData.data ? (
-            eventListData.data.map((event) => {
-              return (
-                <option key={event.id} value={event.id}>
-                  {event.name}
-                </option>
-              );
-            })
-          ) : (
-            <option disabled>Loading...</option>
-          )}
+          {eventList.map((event) => {
+            return (
+              <option key={event.id} value={event.id}>
+                {event.name}
+              </option>
+            );
+          })}
         </select>
         <br />
         <select
@@ -290,6 +254,26 @@ export default SubmitGuide;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerAuthSession(ctx);
+  const operatorList = await prisma.operator.findMany({
+    orderBy: [
+      {
+        rarity: "desc",
+      },
+      {
+        name: "asc",
+      },
+    ],
+  });
+  const tagList = await prisma.tag.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
+  const eventList = await prisma.event.findMany({
+    orderBy: {
+      startDate: "desc",
+    },
+  });
 
   if (!session) {
     return {
@@ -301,6 +285,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 
   return {
-    props: {},
+    props: {
+      operatorList,
+      tagList,
+      eventList: JSON.parse(JSON.stringify(eventList)),
+    },
   };
 };
