@@ -40,9 +40,9 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
           <FaFilter />
         </Button>
       </div>
-      <div className="h-8 w-8 md:h-10 md:w-10">
+      <div className="flex h-8 w-8 items-center justify-center md:h-10 md:w-10">
         {session.status === "loading" ? (
-          <LoadingSpinner />
+          <LoadingSpinner className="align-middle" />
         ) : session.status === "authenticated" ? (
           <>
             <Menu as="div" className="relative md:h-10">

@@ -9,14 +9,23 @@ export const youtubeRouter = router({
     .input(
       z
         .string()
-        .length(11, { message: "Invalid YouTube video ID" })
-        .regex(/[a-zA-Z0-9_-]{11}$/, {
-          message: "Invalid YouTube video ID",
+        .min(1, { message: "Please enter a link." })
+        .url({ message: "Invalid URL." })
+        .startsWith("https://www.youtube.com/watch?v=", {
+          message: "Invalid URL. Please enter a link from YouTube.",
         })
     )
     .mutation(async ({ ctx, input }) => {
+      const urlObj = new URL(input);
+      const videoId = urlObj.searchParams.get("v");
+      if (!videoId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid URL.",
+        });
+      }
       return fetch(
-        `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${input}&key=${env.GOOGLE_API_KEY}`
+        `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${env.GOOGLE_API_KEY}`
       )
         .then((res) => {
           return res.json() as Promise<YoutubeVideo>;
@@ -26,7 +35,7 @@ export const youtubeRouter = router({
             const snippet = res.items[0]?.snippet;
             if (snippet) {
               return {
-                id: input,
+                id: videoId,
                 channelId: snippet.channelId,
                 title: snippet.title,
                 thumbnail: Object.values(snippet.thumbnails).pop()?.url,

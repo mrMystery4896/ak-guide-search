@@ -1,10 +1,16 @@
+import { Event, Operator, Stage, Tag } from "@prisma/client";
 import { GetServerSideProps, type NextPage } from "next";
 import Image from "next/image";
 import { useRef, useState } from "react";
-import { trpc } from "../utils/trpc";
-import { Event, Operator, Stage, Tag } from "@prisma/client";
-import { getServerAuthSession } from "../server/common/get-server-auth-session";
+import Button from "../components/Button";
+import Input from "../components/Input";
 import { env } from "../env/client.mjs";
+import { getServerAuthSession } from "../server/common/get-server-auth-session";
+import { trpc } from "../utils/trpc";
+import { HiArrowsUpDown } from "react-icons/hi2";
+import Tooltip from "../components/Tooltip";
+import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const SubmitGuide: NextPage = () => {
   const videoUrlInputRef = useRef<HTMLInputElement>(null);
@@ -13,7 +19,6 @@ const SubmitGuide: NextPage = () => {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
-  const [videoId, setVideoId] = useState<string>("");
 
   const operatorListData = trpc.operator.getAllOperators.useQuery();
   const tagListData = trpc.tag.getAllTags.useQuery();
@@ -25,29 +30,23 @@ const SubmitGuide: NextPage = () => {
   const {
     data: youtubeData,
     error: youtubeError,
-    isLoading,
+    isLoading: videoIsLoading,
     mutate,
   } = trpc.youtube.getVideo.useMutation();
   const { error: submitGuideError, mutate: submitGuide } =
     trpc.guide.submitGuide.useMutation();
 
   const getVideoDetails = async () => {
-    // set video id from youtube url entered in input
     if (!videoUrlInputRef.current) return;
-    const url = new URL(videoUrlInputRef.current.value);
-    const videoId = url.searchParams.get("v");
-    if (!videoId) return;
-    setVideoId(videoId);
-    mutate(videoId);
+    mutate(videoUrlInputRef.current.value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({});
     if (!selectedStage) return;
     if (!youtubeData) return;
     submitGuide({
-      id: videoId,
+      id: youtubeData.id,
       title: youtubeData.title,
       stageCode: selectedStage.stageCode,
       operatorIds: selectedOperators.map((operator) => operator.id),
@@ -57,43 +56,55 @@ const SubmitGuide: NextPage = () => {
     });
   };
 
-  // if (operatorListData.isLoading || tagListData.isLoading)
-  //   return <p>Loading...</p>;
-
   return (
     <>
       <h1 className="text-2xl font-bold">Submit Guide</h1>
       {submitGuideError ? (
         <p className="text-red-500">{submitGuideError.message}</p>
       ) : null}
-      <input
-        type="text"
-        placeholder="link to YouTube video"
-        ref={videoUrlInputRef}
-      />
-      <button onClick={getVideoDetails} type="button">
-        get details
-      </button>
-      {youtubeError ? (
-        <p>{youtubeError.data?.zodError?.formErrors[0]}</p>
-      ) : null}
+      <h2 className="mt-2 flex items-center text-xl font-bold">
+        YouTube Link
+        <Tooltip content="test" />
+      </h2>
+      <div className="mt-3 flex w-full">
+        <Input
+          type="text"
+          placeholder="Link to Guide on YouTube"
+          ref={videoUrlInputRef}
+          errorMessage={youtubeError?.data?.zodError?.formErrors[0]}
+          className="mr-4 w-[50vw]"
+        />
+        <Button
+          onClick={getVideoDetails}
+          type="button"
+          isLoading={videoIsLoading}
+          className="h-full"
+        >
+          <HiArrowsUpDown className="inline-block md:mr-2" />
+          <span className="hidden md:inline-block">Fetch</span>
+        </Button>
+      </div>
       {/* Loading state for fetching video */}
-      {isLoading ? <p>Loading...</p> : null}
       {youtubeData ? (
-        <div>
-          <b>{youtubeData.title}</b>
-          <p>{youtubeData.channelTitle}</p>
-          <Image
-            src={youtubeData.thumbnail}
-            alt={youtubeData.title}
-            height={480}
-            width={640}
-          />
+        <div className="mt-4 flex flex-col md:flex-row">
+          <div className="relative h-44 w-80 overflow-hidden rounded-md">
+            <Image
+              src={youtubeData.thumbnail}
+              alt={youtubeData.title}
+              fill
+              style={{ objectFit: "cover" }}
+            />
+          </div>
+          <div className="mt-2 gap-2 md:ml-4 md:mt-0">
+            <h3 className="text-lg font-bold">{youtubeData.title}</h3>
+            <p className="text-slate-300">{youtubeData.channelTitle}</p>
+          </div>
         </div>
       ) : (
         <p>No video</p>
       )}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="mt-2">
+        <h2 className="text-xl font-bold">Select Operators</h2>
         {selectedOperators.map((operator) => {
           return (
             <div key={operator.id}>
@@ -112,7 +123,19 @@ const SubmitGuide: NextPage = () => {
             </div>
           );
         })}
-        <select
+        {operatorListData.data ? (
+          <SelectOperatorDropdown
+            operators={operatorListData.data.filter(
+              (operator) => !selectedOperators.includes(operator)
+            )}
+            setSelectedOperators={setSelectedOperators}
+          />
+        ) : (
+          <>
+            <LoadingSpinner />
+          </>
+        )}
+        {/* <select
           onChange={(e) => {
             setSelectedOperators([
               ...selectedOperators,
@@ -141,7 +164,8 @@ const SubmitGuide: NextPage = () => {
           ) : (
             <option disabled>Loading...</option>
           )}
-        </select>
+        </select> */}
+        <br />
         {selectedTags.map((tag) => {
           return (
             <div key={tag.id}>
@@ -188,6 +212,7 @@ const SubmitGuide: NextPage = () => {
             <option disabled>Loading...</option>
           )}
         </select>
+        <br />
         {selectedEvent ? (
           <Image
             src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/ak-event-banner/${selectedEvent.id}.png`}
@@ -222,6 +247,7 @@ const SubmitGuide: NextPage = () => {
             <option disabled>Loading...</option>
           )}
         </select>
+        <br />
         <select
           defaultValue={selectedEvent ? "" : "no-event-selected"}
           disabled={!selectedEvent}

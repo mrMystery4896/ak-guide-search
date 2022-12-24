@@ -2,6 +2,7 @@ import { Creator, Guide, Operator, Tag } from "@prisma/client";
 import Image from "next/image";
 import { env } from "../env/client.mjs";
 import TagCard from "./TagCard";
+import { translateRarityToClassName } from "../utils/functions";
 
 interface GuideCardProps {
   guide: Guide & {
@@ -12,25 +13,6 @@ interface GuideCardProps {
 }
 
 const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
-  const translateRarityToClassName = (rarity: number) => {
-    switch (rarity) {
-      case 1:
-        return "bg-1-star";
-      case 2:
-        return "bg-2-star";
-      case 3:
-        return "bg-3-star";
-      case 4:
-        return "bg-4-star";
-      case 5:
-        return "bg-5-star";
-      case 6:
-        return "bg-6-star";
-      default:
-        return "bg-gray-100";
-    }
-  };
-
   return (
     <div className="relative flex w-full flex-col items-start overflow-hidden rounded-md bg-gray-300 md:h-[180px] md:flex-row md:rounded-xl xl:h-[270px]">
       <div className="relative min-w-full overflow-hidden pb-[56%] md:h-[180px] md:min-w-[320px] md:pb-0 xl:h-[270px] xl:min-w-[480px]">
