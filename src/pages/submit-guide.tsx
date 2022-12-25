@@ -10,8 +10,8 @@ import { trpc } from "../utils/trpc";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import Tooltip from "../components/Tooltip";
 import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
-import LoadingSpinner from "../components/LoadingSpinner";
 import { prisma } from "../server/db/client";
+import { translateRarityToClassName } from "../utils/functions";
 
 interface SubmitGuideProps {
   operatorList: Operator[];
@@ -95,7 +95,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
       {/* Loading state for fetching video */}
       {youtubeData ? (
         <div className="mt-4 flex flex-col md:flex-row">
-          <div className="relative h-44 w-80 overflow-hidden rounded-md">
+          <div className="relative h-44 w-80 min-w-[320px] max-w-full overflow-hidden rounded-md drop-shadow-md md:rounded-lg">
             <Image
               src={youtubeData.thumbnail}
               alt={youtubeData.title}
@@ -104,38 +104,56 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
             />
           </div>
           <div className="mt-2 gap-2 md:ml-4 md:mt-0">
-            <h3 className="text-lg font-bold">{youtubeData.title}</h3>
-            <p className="text-slate-300">{youtubeData.channelTitle}</p>
+            <h3 className="text-lg font-bold md:text-2xl">
+              {youtubeData.title}
+            </h3>
+            <p className="mt-2 text-slate-300">{youtubeData.channelTitle}</p>
           </div>
         </div>
-      ) : (
-        <p>No video</p>
-      )}
-      <form onSubmit={handleSubmit} className="mt-2">
-        <h2 className="text-xl font-bold">Select Operators</h2>
-        {selectedOperators.map((operator) => {
-          return (
-            <div key={operator.id}>
-              <p>{operator.name}</p>
-              <button
-                onClick={() => {
-                  setSelectedOperators(
-                    selectedOperators.filter(
-                      (selectedOperator) => selectedOperator.id !== operator.id
-                    )
-                  );
-                }}
-              >
-                remove
-              </button>
-            </div>
-          );
-        })}
+      ) : null}
+      <form onSubmit={handleSubmit} className="mt-2 md:mt-5">
+        <h2 className="text-xl font-bold">
+          Select Operators &#40;Click to Remove&#41;
+        </h2>
+        <div className="my-2 flex flex-wrap gap-4">
+          {selectedOperators
+            .sort((a, b) => b.rarity - a.rarity)
+            .map((operator) => {
+              return (
+                <div
+                  key={operator.id}
+                  className={`${translateRarityToClassName(
+                    operator.rarity
+                  )} relative h-16 w-16 cursor-pointer overflow-hidden rounded-md`}
+                  onClick={() => {
+                    setSelectedOperators(
+                      selectedOperators.filter(
+                        (selectedOperator) =>
+                          selectedOperator.id !== operator.id
+                      )
+                    );
+                  }}
+                >
+                  <Image
+                    src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
+                    alt={operator.name}
+                    fill
+                  />
+                  <div className="absolute h-full w-full bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100">
+                    <p className="absolute bottom-0 w-full truncate px-1 text-center text-sm">
+                      {operator.name}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
         <SelectOperatorDropdown
           operators={operatorList.filter(
             (operator) => !selectedOperators.includes(operator)
           )}
           setSelectedOperators={setSelectedOperators}
+          className="mt-2"
         />
         <br />
         {selectedTags.map((tag) => {
