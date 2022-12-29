@@ -5,12 +5,12 @@ const Tooltip: React.FC<{ content: string }> = ({ content }) => {
   return (
     <Tippy
       render={(attrs) => (
-        <button
-          className="absolute left-5 bg-gray-300 p-2 text-sm drop-shadow-md"
+        <div
+          className="absolute left-5 rounded-md bg-gray-300 p-2 text-sm drop-shadow-md"
           {...attrs}
         >
           {content}
-        </button>
+        </div>
       )}
     >
       <div>

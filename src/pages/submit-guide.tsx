@@ -12,6 +12,8 @@ import Tooltip from "../components/Tooltip";
 import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
 import { prisma } from "../server/db/client";
 import { translateRarityToClassName } from "../utils/functions";
+import TagCard from "../components/TagCard";
+import SelectTagDropdown from "../components/SelectTagDropdown";
 
 interface SubmitGuideProps {
   operatorList: Operator[];
@@ -115,39 +117,41 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
         <h2 className="text-xl font-bold">
           Select Operators &#40;Click to Remove&#41;
         </h2>
-        <div className="my-2 flex flex-wrap gap-4">
-          {selectedOperators
-            .sort((a, b) => b.rarity - a.rarity)
-            .map((operator) => {
-              return (
-                <div
-                  key={operator.id}
-                  className={`${translateRarityToClassName(
-                    operator.rarity
-                  )} relative h-16 w-16 cursor-pointer overflow-hidden rounded-md`}
-                  onClick={() => {
-                    setSelectedOperators(
-                      selectedOperators.filter(
-                        (selectedOperator) =>
-                          selectedOperator.id !== operator.id
-                      )
-                    );
-                  }}
-                >
-                  <Image
-                    src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
-                    alt={operator.name}
-                    fill
-                  />
-                  <div className="absolute h-full w-full bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100">
-                    <p className="absolute bottom-0 w-full truncate px-1 text-center text-sm">
-                      {operator.name}
-                    </p>
+        {selectedOperators.length > 0 ? (
+          <div className="my-2 flex flex-wrap gap-4">
+            {selectedOperators
+              .sort((a, b) => b.rarity - a.rarity)
+              .map((operator) => {
+                return (
+                  <div
+                    key={operator.id}
+                    className={`${translateRarityToClassName(
+                      operator.rarity
+                    )} relative h-16 w-16 cursor-pointer overflow-hidden rounded-md`}
+                    onClick={() => {
+                      setSelectedOperators(
+                        selectedOperators.filter(
+                          (selectedOperator) =>
+                            selectedOperator.id !== operator.id
+                        )
+                      );
+                    }}
+                  >
+                    <Image
+                      src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
+                      alt={operator.name}
+                      fill
+                    />
+                    <div className="absolute h-full w-full bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100">
+                      <p className="absolute bottom-0 w-full truncate px-1 text-center text-sm">
+                        {operator.name}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-        </div>
+                );
+              })}
+          </div>
+        ) : null}
         <SelectOperatorDropdown
           operators={operatorList.filter(
             (operator) => !selectedOperators.includes(operator)
@@ -155,49 +159,33 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           setSelectedOperators={setSelectedOperators}
           className="mt-2"
         />
-        <br />
-        {selectedTags.map((tag) => {
-          return (
-            <div key={tag.id}>
-              <p>{tag.name}</p>
-              <button
-                onClick={() => {
-                  setSelectedTags(
-                    selectedTags.filter(
-                      (selectedTag) => selectedTag.id !== tag.id
-                    )
-                  );
-                }}
-              >
-                remove
-              </button>
-            </div>
-          );
-        })}
-        <select
-          onChange={(e) => {
-            setSelectedTags([
-              ...selectedTags,
-              tagList.find((tag) => tag.id === e.target.value) as Tag,
-            ]);
-            e.target.value = "";
-          }}
-          defaultValue={""}
-          className="w-32"
-        >
-          <option value="" disabled>
-            Select Tag
-          </option>
-          {tagList
-            .filter((tag) => !selectedTags.includes(tag))
-            .map((tag) => {
+        <h2 className="mt-5 text-xl font-bold">
+          Select Tags &#40;Click to Remove&#41;
+        </h2>
+        {selectedTags.length > 0 ? (
+          <div className="flex flex-wrap gap-2 py-2 md:gap-3">
+            {selectedTags.map((tag) => {
               return (
-                <option key={tag.id} value={tag.id}>
-                  {tag.name}
-                </option>
+                <TagCard
+                  tag={tag}
+                  key={tag.id}
+                  onClick={() => {
+                    setSelectedTags(
+                      selectedTags.filter(
+                        (selectedTag) => selectedTag.id !== tag.id
+                      )
+                    );
+                  }}
+                />
               );
             })}
-        </select>
+          </div>
+        ) : null}
+        <SelectTagDropdown
+          setSelectedTags={setSelectedTags}
+          tags={tagList.filter((tag) => !selectedTags.includes(tag))}
+          className="mt-2"
+        />
         <br />
         {selectedEvent ? (
           <Image

@@ -53,8 +53,7 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
             placeholder="Search for an operator"
           />
         </div>
-        {/* {filteredOperators.length !== 0 && query !== "" ? ( */}
-        <Combobox.Options className="absolute z-10 max-h-52 w-44 translate-y-1 overflow-auto rounded-md bg-gray-300 p-2 pr-3 scrollbar-thin scrollbar-track-gray-200 scrollbar-thumb-gray-400 scrollbar-track-rounded scrollbar-thumb-rounded-md md:w-64">
+        <Combobox.Options className="absolute z-10 max-h-52 w-44 translate-y-1 overflow-auto rounded-md bg-gray-300 p-1 pr-2 scrollbar-thin scrollbar-track-gray-200 scrollbar-thumb-gray-500 scrollbar-track-rounded scrollbar-thumb-rounded-md md:w-64 md:p-2 md:pr-3">
           {filteredOperators.length !== 0 && query !== "" ? (
             filteredOperators.map((operator) => {
               return (
@@ -67,10 +66,10 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
                     <li
                       className={`${
                         active ? "bg-primary" : ""
-                      } flex h-12 cursor-pointer items-center gap-4 rounded-md p-1 md:h-14 md:p-2`}
+                      } flex h-10 cursor-pointer items-center gap-2 rounded-md p-1 md:h-14 md:gap-4 md:p-2`}
                     >
                       <div
-                        className={`relative h-5 w-5 overflow-hidden rounded-full md:h-10 md:w-10 ${translateRarityToClassName(
+                        className={`relative h-6 w-6 overflow-hidden rounded-full md:h-10 md:w-10 ${translateRarityToClassName(
                           operator.rarity
                         )}`}
                       >
@@ -92,7 +91,6 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
             </Combobox.Option>
           )}
         </Combobox.Options>
-        {/* ) : null} */}
       </Combobox>
     </>
   );
