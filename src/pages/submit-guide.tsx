@@ -81,7 +81,9 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           type="text"
           placeholder="Link to Guide on YouTube"
           ref={videoUrlInputRef}
-          errorMessage={youtubeError?.data?.zodError?.formErrors[0]}
+          errorMessage={
+            youtubeError?.data?.zodError?.formErrors[0] ?? youtubeError?.message
+          }
           className="mr-4 w-[50vw]"
         />
         <Button
@@ -186,7 +188,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           tags={tagList.filter((tag) => !selectedTags.includes(tag))}
           className="mt-2"
         />
-        <br />
+        <h2 className="mt-5 text-xl font-bold">Select An Event</h2>
         {selectedEvent ? (
           <Image
             src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/ak-event-banner/${selectedEvent.id}.png`}

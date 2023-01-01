@@ -81,6 +81,26 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                     );
                   }}
                 </Menu.Item>
+                {session.data.user?.role === "ADMIN" ? (
+                  <Menu.Item>
+                    {({ active, close }) => {
+                      return (
+                        <Link href="/admin" onClick={close}>
+                          <div
+                            className={`${
+                              active ? "bg-primary" : ""
+                            } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                          >
+                            <span>
+                              <FaUser />
+                            </span>
+                            Admin Panel
+                          </div>
+                        </Link>
+                      );
+                    }}
+                  </Menu.Item>
+                ) : null}
                 <Menu.Item>
                   {({ active, close }) => {
                     return (

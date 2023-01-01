@@ -19,9 +19,12 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           {...props}
         />
-        {errorMessage && (
+        <span className={`text-sm text-red ${errorMessage ? "" : "invisible"}`}>
+          {errorMessage}
+        </span>
+        {/* {errorMessage && (
           <span className="text-sm text-red">{errorMessage}</span>
-        )}
+        )} */}
       </div>
     );
   }

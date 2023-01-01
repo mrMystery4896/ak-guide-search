@@ -125,11 +125,16 @@ model Guide {
 }
 
 model Event {
-  id          String   @id @default(cuid())
-  name        String
-  startDate   DateTime
-  endDate     DateTime
-  description String
-  stages      Stage[]
-  imageUrl    String
+  id            String    @id @default(cuid())
+  name          String
+  startDate     DateTime?
+  endDate       DateTime?
+  description   String?
+  stages        Stage[]
+  imageUrl      String?
+  parentEvent   Event?    @relation("EventToEvent", fields: [parentEventId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parentEventId String?
+  childEvents   Event[]   @relation("EventToEvent")
+
+  @@index([parentEventId])
 }
