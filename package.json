@@ -21,6 +21,7 @@
     "@trpc/react-query": "^10.0.0",
     "@trpc/server": "^10.0.0",
     "@types/node-fetch": "^2.6.2",
+    "framer-motion": "^8.0.2",
     "next": "13.0.2",
     "next-auth": "^4.18.3",
     "nextjs-progressbar": "^0.0.16",

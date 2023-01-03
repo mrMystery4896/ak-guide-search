@@ -10,6 +10,7 @@ import { FaUser, FaSearch, FaFilter } from "react-icons/fa";
 import { BsFillGearFill } from "react-icons/bs";
 import { GoSignOut } from "react-icons/go";
 import { MdLibraryAdd } from "react-icons/md";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface NavbarProps {
   session: ReturnType<typeof useSession>;
@@ -46,98 +47,114 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
         ) : session.status === "authenticated" ? (
           <>
             <Menu as="div" className="relative md:h-10">
-              <Menu.Button className="focus:outline-none">
-                {/* user profile picture round as button */}
-                {session.data.user?.image ? (
-                  <Image
-                    src={session.data.user.image}
-                    alt="user profile picture"
-                    width={40}
-                    height={40}
-                    className="h-full rounded-full"
-                  />
-                ) : (
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 focus:outline-none">
-                    <FaUser className="text-2xl" />
-                  </div>
-                )}
-              </Menu.Button>
-              <Menu.Items className="absolute right-0 z-10 flex flex-col rounded-md bg-gray-300 p-1 drop-shadow-md md:translate-x-1/3">
-                <Menu.Item>
-                  {({ active, close }) => {
-                    return (
-                      <Link href="/submit-guide" onClick={close}>
-                        <div
-                          className={`${
-                            active ? "bg-primary" : ""
-                          } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
-                        >
-                          <span>
-                            <MdLibraryAdd />
-                          </span>
-                          Submit Guide
-                        </div>
-                      </Link>
-                    );
-                  }}
-                </Menu.Item>
-                {session.data.user?.role === "ADMIN" ? (
-                  <Menu.Item>
-                    {({ active, close }) => {
-                      return (
-                        <Link href="/admin" onClick={close}>
-                          <div
-                            className={`${
-                              active ? "bg-primary" : ""
-                            } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
-                          >
-                            <span>
-                              <FaUser />
-                            </span>
-                            Admin Panel
-                          </div>
-                        </Link>
-                      );
-                    }}
-                  </Menu.Item>
-                ) : null}
-                <Menu.Item>
-                  {({ active, close }) => {
-                    return (
-                      <Link href="/settings" onClick={close}>
-                        <div
-                          className={`${
-                            active ? "bg-primary" : ""
-                          } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
-                        >
-                          <span>
-                            <BsFillGearFill />
-                          </span>
-                          Settings
-                        </div>
-                      </Link>
-                    );
-                  }}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => {
-                    return (
-                      <button onClick={() => signOut()}>
-                        <div
-                          className={`${
-                            active ? "bg-primary" : ""
-                          } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
-                        >
-                          <span>
-                            <GoSignOut />
-                          </span>
-                          Sign Out
-                        </div>
-                      </button>
-                    );
-                  }}
-                </Menu.Item>
-              </Menu.Items>
+              {({ open }) => (
+                <>
+                  <Menu.Button className="focus:outline-none">
+                    {/* user profile picture round as button */}
+                    {session.data.user?.image ? (
+                      <Image
+                        src={session.data.user.image}
+                        alt="user profile picture"
+                        width={40}
+                        height={40}
+                        className="h-full rounded-full"
+                      />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 focus:outline-none">
+                        <FaUser className="text-2xl" />
+                      </div>
+                    )}
+                  </Menu.Button>
+                  <AnimatePresence>
+                    {open && (
+                      <Menu.Items
+                        as={motion.div}
+                        key="menu"
+                        static
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute right-0 z-10 flex flex-col rounded-md bg-gray-300 p-1 drop-shadow-md md:translate-x-1/3"
+                      >
+                        <Menu.Item>
+                          {({ active, close }) => {
+                            return (
+                              <Link href="/submit-guide" onClick={close}>
+                                <div
+                                  className={`${
+                                    active ? "bg-primary" : ""
+                                  } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                >
+                                  <span>
+                                    <MdLibraryAdd />
+                                  </span>
+                                  Submit Guide
+                                </div>
+                              </Link>
+                            );
+                          }}
+                        </Menu.Item>
+                        {session.data.user?.role === "ADMIN" ? (
+                          <Menu.Item>
+                            {({ active, close }) => {
+                              return (
+                                <Link href="/admin" onClick={close}>
+                                  <div
+                                    className={`${
+                                      active ? "bg-primary" : ""
+                                    } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                  >
+                                    <span>
+                                      <FaUser />
+                                    </span>
+                                    Admin Panel
+                                  </div>
+                                </Link>
+                              );
+                            }}
+                          </Menu.Item>
+                        ) : null}
+                        <Menu.Item>
+                          {({ active, close }) => {
+                            return (
+                              <Link href="/settings" onClick={close}>
+                                <div
+                                  className={`${
+                                    active ? "bg-primary" : ""
+                                  } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                >
+                                  <span>
+                                    <BsFillGearFill />
+                                  </span>
+                                  Settings
+                                </div>
+                              </Link>
+                            );
+                          }}
+                        </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => {
+                            return (
+                              <button onClick={() => signOut()}>
+                                <div
+                                  className={`${
+                                    active ? "bg-primary" : ""
+                                  } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                >
+                                  <span>
+                                    <GoSignOut />
+                                  </span>
+                                  Sign Out
+                                </div>
+                              </button>
+                            );
+                          }}
+                        </Menu.Item>
+                      </Menu.Items>
+                    )}
+                  </AnimatePresence>
+                </>
+              )}
             </Menu>
           </>
         ) : (
