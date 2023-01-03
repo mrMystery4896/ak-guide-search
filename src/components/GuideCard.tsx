@@ -3,6 +3,7 @@ import Image from "next/image";
 import { env } from "../env/client.mjs";
 import TagCard from "./TagCard";
 import { translateRarityToClassName } from "../utils/functions";
+import { motion, Variants } from "framer-motion";
 
 interface GuideCardProps {
   guide: Guide & {
@@ -12,9 +13,23 @@ interface GuideCardProps {
   };
 }
 
+const guideCard: Variants = {
+  visible: {
+    opacity: 1,
+    y: 0,
+  },
+  hidden: {
+    opacity: 0,
+    y: 10,
+  },
+};
+
 const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
   return (
-    <div className="relative flex w-full flex-col items-start overflow-hidden rounded-lg bg-gray-300 md:h-[180px] md:flex-row md:rounded-xl xl:h-[270px]">
+    <motion.div
+      variants={guideCard}
+      className="relative flex w-full flex-col items-start overflow-hidden rounded-lg bg-gray-300 md:h-[180px] md:flex-row md:rounded-xl xl:h-[270px]"
+    >
       <div className="relative min-w-full overflow-hidden pb-[56%] md:h-[180px] md:min-w-[320px] md:pb-0 xl:h-[270px] xl:min-w-[480px]">
         <Image
           src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/guide-thumbnail/${guide.id}.png`}
@@ -63,7 +78,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
             })}
         </ul>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

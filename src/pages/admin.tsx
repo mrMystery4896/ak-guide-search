@@ -44,22 +44,38 @@ const AdminPage: NextPage<AdminPageProps> = ({ operatorList, eventList }) => {
       <Tab.Group
         vertical={!isSmallScreen}
         as="div"
-        className="mt-2 flex h-auto w-auto flex-col md:mt-4 md:flex-row"
+        className="mt-2 flex h-auto w-full flex-col md:mt-4 md:flex-row"
       >
-        <Tab.List className="flex overflow-x-scroll scrollbar-none md:flex-col">
-          <TabItem>Add Events</TabItem>
-          <TabItem>Add Operators</TabItem>
+        <Tab.List className="flex overflow-x-scroll scrollbar-none md:w-48 md:flex-col">
+          <TabItem>Manage Events</TabItem>
+          <TabItem>Manage Operators</TabItem>
           <TabItem>Manage Users</TabItem>
         </Tab.List>
-        <Tab.Panels className="m-4">
-          <Tab.Panel>
-            <EditEventList eventList={eventList} />
+        <Tab.Panels className="w-full p-4 pt-0">
+          <Tab.Panel
+            as={motion.div}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h2 className="mt-0 text-xl font-bold">Manage Events and Stages</h2>
+            <EditEventList eventList={eventList} parentEventName="Root" />
           </Tab.Panel>
-          <Tab.Panel>
-            <h2>Add Operators</h2>
+          <Tab.Panel
+            as={motion.div}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h2 className="m-2 mt-0 text-xl font-bold">Manage Operators</h2>
           </Tab.Panel>
-          <Tab.Panel>
-            <h2>Manage Users</h2>
+          <Tab.Panel
+            as={motion.div}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h2 className="m-2 mt-0 text-xl font-bold">Manage Users</h2>
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>
