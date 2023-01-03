@@ -1,7 +1,7 @@
 import { Tab } from "@headlessui/react";
 import { Operator } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
-import EditEventList from "../components/EditEventList";
+import EventList from "../components/EditEventList";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
 import { EventWithChildren } from "../utils/common-types";
 import { useMediaQuery } from "react-responsive";
@@ -51,7 +51,7 @@ const AdminPage: NextPage<AdminPageProps> = ({ operatorList, eventList }) => {
           <TabItem>Manage Operators</TabItem>
           <TabItem>Manage Users</TabItem>
         </Tab.List>
-        <Tab.Panels className="w-full p-4 pt-0">
+        <Tab.Panels className="w-full pt-4 md:p-4 md:pt-0">
           <Tab.Panel
             as={motion.div}
             initial={{ opacity: 0, y: 10 }}
@@ -59,7 +59,7 @@ const AdminPage: NextPage<AdminPageProps> = ({ operatorList, eventList }) => {
             transition={{ duration: 0.4 }}
           >
             <h2 className="mt-0 text-xl font-bold">Manage Events and Stages</h2>
-            <EditEventList eventList={eventList} parentEventName="Root" />
+            <EventList eventList={eventList} />
           </Tab.Panel>
           <Tab.Panel
             as={motion.div}
