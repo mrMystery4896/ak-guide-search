@@ -1,54 +1,69 @@
-import { Operator, Event, Stage } from "@prisma/client";
+import { Tab } from "@headlessui/react";
+import { Operator } from "@prisma/client";
 import { GetServerSideProps, NextPage } from "next";
-import Button from "../components/Button";
+import EditEventList from "../components/EditEventList";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
-
-type EventWithChildren = Event & {
-  stages: Stage[];
-  childEvents?: EventWithChildren[];
-};
+import { EventWithChildren } from "../utils/common-types";
+import { useMediaQuery } from "react-responsive";
+import React from "react";
+import { motion } from "framer-motion";
 
 interface AdminPageProps {
   operatorList: Operator[];
   eventList: EventWithChildren[];
 }
 
-const AdminPage: NextPage<AdminPageProps> = ({ operatorList, eventList }) => {
+const TabItem = ({ children }: { children: React.ReactNode }) => {
   return (
-    <>
-      <h1>Admin Page</h1>
-      <NestedEvent eventList={eventList} />
-    </>
+    <Tab as={React.Fragment}>
+      {({ selected }) => (
+        <div
+          className={`relative h-auto cursor-pointer whitespace-nowrap p-2 font-semibold focus:outline-none md:pr-4 md:text-right ${
+            selected ? "text-primary" : "text-gray-100"
+          } `}
+        >
+          {children}
+          {selected && (
+            <motion.div
+              layoutId={selected ? "selectedTab" : ""}
+              className="absolute bottom-0 left-0 h-1 w-full rounded-full bg-primary md:top-0 md:right-0 md:left-auto md:h-full md:w-1"
+            />
+          )}
+        </div>
+      )}
+    </Tab>
   );
 };
 
-const NestedEvent: React.FC<{ eventList: EventWithChildren[] }> = ({
-  eventList,
-}) => {
+const AdminPage: NextPage<AdminPageProps> = ({ operatorList, eventList }) => {
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 768px)" });
+
   return (
-    <ul className="border-l-2 border-gray-300 p-2">
-      {eventList.map((event) => {
-        return (
-          <li key={event.id}>
-            {event.name + " " + event.id}
-            {event.childEvents && <NestedEvent eventList={event.childEvents} />}
-            {event.stages.length > 0 ? (
-              <>
-                <ul className="border-l-2 border-gray-300 p-2">
-                  {event.stages.map((stage) => (
-                    <li key={stage.stageCode}>{stage.stageCode}</li>
-                  ))}
-                  <Button>Add Stage</Button>
-                </ul>
-              </>
-            ) : null}
-          </li>
-        );
-      })}
-      <Button onClick={() => console.log(eventList[0]?.parentEventId)}>
-        Add to {eventList[0]?.parentEventId || "root"}
-      </Button>
-    </ul>
+    <>
+      <h1 className="text-2xl font-bold">Admin Settings</h1>
+      <Tab.Group
+        vertical={!isSmallScreen}
+        as="div"
+        className="mt-2 flex h-auto w-auto flex-col md:mt-4 md:flex-row"
+      >
+        <Tab.List className="flex overflow-x-scroll scrollbar-none md:flex-col">
+          <TabItem>Add Events</TabItem>
+          <TabItem>Add Operators</TabItem>
+          <TabItem>Manage Users</TabItem>
+        </Tab.List>
+        <Tab.Panels className="m-4">
+          <Tab.Panel>
+            <EditEventList eventList={eventList} />
+          </Tab.Panel>
+          <Tab.Panel>
+            <h2>Add Operators</h2>
+          </Tab.Panel>
+          <Tab.Panel>
+            <h2>Manage Users</h2>
+          </Tab.Panel>
+        </Tab.Panels>
+      </Tab.Group>
+    </>
   );
 };
 

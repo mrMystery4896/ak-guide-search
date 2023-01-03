@@ -107,7 +107,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                                     <span>
                                       <FaUser />
                                     </span>
-                                    Admin Panel
+                                    Admin Settings
                                   </div>
                                 </Link>
                               );

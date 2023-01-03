@@ -26,7 +26,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
           loading="eager"
         />
       </div>
-      <div className="flex min-h-fit flex-col gap-4 p-4 md:h-[180px] md:w-auto md:justify-between xl:h-[270px] xl:justify-start xl:gap-8 xl:p-6">
+      <div className="flex min-h-fit w-auto max-w-full flex-col gap-4 p-4 md:h-[180px] md:w-auto md:justify-between xl:h-[270px] xl:justify-start xl:gap-8 xl:p-6">
         <div>
           <h3 className="truncate text-xl font-bold xl:text-2xl">
             {guide.title}
