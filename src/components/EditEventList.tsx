@@ -166,10 +166,11 @@ const EditEventList: React.FC<EditEventListProps> = ({
                 </Dialog.Title>
                 <form>
                   <div className="mt-2" />
-                  <label htmlFor="categoryName">Category Name</label>
+                  {/* <label htmlFor="categoryName">Category Name</label> */}
                   <Input
                     ref={categoryNameInputRef}
                     id="categoryName"
+                    label="Category Name"
                     placeholder="Category Name"
                   />
                   <div className="mt-2 flex flex-row items-center">

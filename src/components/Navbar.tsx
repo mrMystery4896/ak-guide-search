@@ -30,6 +30,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
           <Input
             placeholder="Search..."
             className="max-h-10 w-[30vw] rounded-l-md rounded-r-none md:w-[40vw]"
+            inputDivClassName="mb-0"
           />
           <span className="absolute inset-y-0 right-0 flex items-center pr-2 md:pr-4">
             <button className="h-full">

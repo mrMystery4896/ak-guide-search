@@ -3,15 +3,24 @@ import { twMerge } from "tailwind-merge";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   errorMessage?: string;
+  label?: string;
+  inputDivClassName?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ errorMessage, className, ...props }, ref) => {
+  ({ errorMessage, inputDivClassName, label, className, ...props }, ref) => {
     return (
-      <div className="flex flex-col">
+      <div
+        className={twMerge("relative mb-5 flex flex-col", inputDivClassName)}
+      >
+        {label && (
+          <label className="text-sm text-slate-200" htmlFor={props.id}>
+            {label}
+          </label>
+        )}
         <input
           className={twMerge(
-            `rounded-md border border-gray-300 bg-gray-300 px-3 py-1 text-sm placeholder:text-sm placeholder:text-gray-100 focus:outline-none md:py-2 md:text-base placeholder:md:text-base ${
+            `rounded-md border-2 border-gray-300 bg-gray-300 px-3 py-1 text-sm placeholder:text-sm placeholder:text-gray-100 focus:outline-none md:py-2 md:text-base placeholder:md:text-base ${
               errorMessage ? "border-red" : "focus:border-primary"
             }`,
             className
@@ -19,12 +28,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           {...props}
         />
-        <span className={`text-sm text-red ${errorMessage ? "" : "invisible"}`}>
+        <span
+          className={`absolute -bottom-5 h-5 text-sm font-semibold text-red ${
+            errorMessage ? "" : "invisible"
+          }`}
+        >
           {errorMessage}
         </span>
-        {/* {errorMessage && (
-          <span className="text-sm text-red">{errorMessage}</span>
-        )} */}
       </div>
     );
   }

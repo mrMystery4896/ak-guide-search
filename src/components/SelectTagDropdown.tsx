@@ -43,7 +43,7 @@ const SelectTagDropdown: React.FC<SelectTagDropdownProps> = ({
                 setQuery(e.target.value);
               }}
               className={twMerge(
-                "w-full rounded-md border border-gray-300 bg-gray-300 py-2 px-3 text-sm placeholder:text-sm placeholder:text-gray-100 focus:border focus:border-primary focus:outline-none md:text-base md:placeholder:text-base ",
+                "w-full rounded-md border-2 border-gray-300 bg-gray-300 py-2 px-3 text-sm placeholder:text-sm placeholder:text-gray-100 focus:border-primary focus:outline-none md:text-base md:placeholder:text-base ",
                 className
               )}
               placeholder="Search for a tag"
