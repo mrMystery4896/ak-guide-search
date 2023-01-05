@@ -16,7 +16,7 @@ export const youtubeRouter = router({
         })
     )
     .mutation(async ({ ctx, input }) => {
-      const urlObj = new URL(input);
+      const urlObj:URL = new URL(input);
       const videoId = urlObj.searchParams.get("v");
       if (!videoId) {
         throw new TRPCError({

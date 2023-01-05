@@ -127,11 +127,10 @@ model Guide {
 model Event {
   id            String    @id @default(cuid())
   name          String
-  startDate     DateTime?
-  endDate       DateTime?
   description   String?
+  startDate     DateTime? @db.Date
+  endDate       DateTime? @db.Date
   stages        Stage[]
-  imageUrl      String?
   parentEvent   Event?    @relation("EventToEvent", fields: [parentEventId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   parentEventId String?
   childEvents   Event[]   @relation("EventToEvent")

@@ -39,10 +39,15 @@ export const guideRouter = router({
       const file = guideThumbnailBucket.file(`${input.id}.png`);
       const stream = file.createWriteStream({ resumable: false });
 
-      // TODO: Handle errors (with try/catch)
-      await fetch(input.thumbnailUrl).then((res) => {
+      try {
+        const res = await fetch(input.thumbnailUrl);
         res.body?.pipe(stream);
-      });
+      } catch (e) {
+        throw new TRPCError({
+          message: "Failed to upload thumbnail",
+          code: "INTERNAL_SERVER_ERROR",
+        });
+      }
 
       return ctx.prisma.guide.create({
         data: {

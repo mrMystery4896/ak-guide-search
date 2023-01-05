@@ -11,10 +11,16 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ errorMessage, inputDivClassName, label, className, ...props }, ref) => {
     return (
       <div
-        className={twMerge("relative mb-5 flex flex-col", inputDivClassName)}
+        className={twMerge(
+          "relative mb-4 flex flex-col md:mb-5",
+          inputDivClassName
+        )}
       >
         {label && (
-          <label className="text-sm text-slate-200" htmlFor={props.id}>
+          <label
+            className="mb-1 text-xs text-slate-200 md:text-sm"
+            htmlFor={props.id}
+          >
             {label}
           </label>
         )}

@@ -189,14 +189,6 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           className="mt-2"
         />
         <h2 className="mt-5 text-xl font-bold">Select An Event</h2>
-        {selectedEvent ? (
-          <Image
-            src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/ak-event-banner/${selectedEvent.id}.png`}
-            alt={selectedEvent.name}
-            width={640}
-            height={480}
-          />
-        ) : null}
         <select
           // value={selectedEvent?.id ?? ""}
           onChange={(e) => {

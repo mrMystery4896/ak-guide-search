@@ -8,6 +8,7 @@ import "../styles/globals.css";
 import Layout from "../components/Layout";
 
 import NextNProgress from "nextjs-progressbar";
+import { Toaster } from "react-hot-toast";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -15,6 +16,12 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+        }}
+      />
       <NextNProgress height={2} color="#6291E9" />
       <Layout>
         <Component {...pageProps} />

@@ -53,7 +53,7 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
             placeholder="Search for an operator"
           />
         </div>
-        <Combobox.Options className="absolute z-10 max-h-52 w-44 translate-y-1 overflow-auto rounded-md bg-gray-300 p-1 pr-2 scrollbar-thin scrollbar-track-gray-200 scrollbar-thumb-gray-500 scrollbar-track-rounded scrollbar-thumb-rounded-md md:w-64 md:p-2 md:pr-3">
+        <Combobox.Options className="absolute z-10 max-h-52 w-44 translate-y-1 overflow-auto rounded-md bg-gray-300 p-1 pr-2 md:w-64 md:p-2 md:pr-3">
           {filteredOperators.length !== 0 && query !== "" ? (
             filteredOperators.map((operator) => {
               return (

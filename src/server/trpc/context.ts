@@ -18,7 +18,7 @@ type CreateContextOptions = {
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  **/
 export const createContextInner = async (opts: CreateContextOptions) => {
-  const storage = new Storage({
+  const storage: Storage = new Storage({
     projectId: env.GOOGLE_CLOUD_STORAGE_PROJECT_ID,
     credentials: {
       client_email: env.GOOGLE_CLOUD_STORAGE_CREDENTIALS_CLIENT_EMAIL,

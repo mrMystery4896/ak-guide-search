@@ -4,6 +4,7 @@ import { env } from "../env/client.mjs";
 import TagCard from "./TagCard";
 import { translateRarityToClassName } from "../utils/functions";
 import { motion, Variants } from "framer-motion";
+import { useMediaQuery } from "react-responsive";
 
 interface GuideCardProps {
   guide: Guide & {
@@ -25,6 +26,8 @@ const guideCard: Variants = {
 };
 
 const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
+  const isXlScreen = useMediaQuery({ query: "(min-width: 1280px)" });
+
   return (
     <motion.div
       variants={guideCard}
@@ -38,11 +41,12 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
           style={{
             objectFit: "scale-down",
           }}
-          loading="eager"
+          sizes="100%"
+          priority={true}
         />
       </div>
-      <div className="flex min-h-fit w-auto max-w-full flex-col gap-4 p-4 md:h-[180px] md:w-auto md:justify-between xl:h-[270px] xl:justify-start xl:gap-8 xl:p-6">
-        <div>
+      <div className="flex min-h-fit w-auto max-w-full flex-col gap-4 p-4 md:h-[180px] md:w-auto md:max-w-[calc(100%-320px)] md:justify-between xl:h-[270px] xl:max-w-[calc(100%-480px)] xl:justify-start xl:gap-8 xl:p-6">
+        <div className="w-full">
           <h3 className="truncate text-xl font-bold xl:text-2xl">
             {guide.title}
           </h3>
@@ -63,14 +67,15 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                 <li
                   key={operator.id}
                   className={
-                    `relative h-10 w-10 overflow-hidden rounded-full md:h-10 md:w-10 xl:h-12 xl:w-12` +
+                    `relative min-h-[40px] min-w-[40px] overflow-hidden rounded-full md:h-10 md:w-10 xl:h-12 xl:w-12` +
                     ` ${translateRarityToClassName(operator.rarity)}`
                   }
                 >
                   <Image
                     src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
                     alt={operator.id}
-                    fill
+                    width={isXlScreen ? 48 : 40}
+                    height={isXlScreen ? 48 : 40}
                     style={{ objectFit: "contain" }}
                   />
                 </li>
