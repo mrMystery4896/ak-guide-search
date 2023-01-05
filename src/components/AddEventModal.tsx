@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { trpc } from "../utils/trpc";
 import Toast from "./Toast";
+import { useRouter } from "next/router";
 
 interface AddEventModalProps {
   modalState: {
@@ -32,8 +33,11 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
     endDate: "",
   };
 
+  const router = useRouter();
+
   const [hasDuration, setHasDuration] = useState(false);
   const [errors, setErrors] = useState(emptyErrorState);
+
   const categoryNameInputRef = useRef<HTMLInputElement>(null);
   const categoryDescriptionInputRef = useRef<HTMLTextAreaElement>(null);
   const eventStartDateDayInputRef = useRef<HTMLInputElement>(null);
@@ -54,6 +58,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
           duration={t.duration}
         />
       ));
+      router.replace(router.asPath);
     },
     onError: (err) => {
       toast.custom((t) => (

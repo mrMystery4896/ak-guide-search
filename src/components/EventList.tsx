@@ -5,11 +5,12 @@ import { Dispatch, SetStateAction } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { EventWithChildren } from "../utils/common-types";
 import Button from "./Button";
+import { RiMenuAddFill } from "react-icons/ri";
+import { BsFillTrashFill } from "react-icons/bs";
 
 interface EventListProps {
   eventList: EventWithChildren[];
   className?: string;
-  parentEvent: EventWithChildren | null;
   setModalState: Dispatch<
     SetStateAction<{
       open: boolean;
@@ -31,25 +32,10 @@ const chevronVariants: Variants = {
 const EventList: React.FC<EventListProps> = ({
   eventList,
   className,
-  parentEvent,
   setModalState,
 }) => {
   return (
     <div className="flex flex-col">
-      {parentEvent?.stages && (
-        <Button
-          className="mt-2 w-full py-2"
-          onClick={() => {
-            setModalState({
-              open: true,
-              title: `Add a category under ${parentEvent?.name || "Root"}`,
-              parentEventId: parentEvent?.id || "",
-            });
-          }}
-        >
-          Add a category under {parentEvent?.name}
-        </Button>
-      )}
       {eventList.map((event) => {
         return (
           <React.Fragment key={event.id}>
@@ -57,18 +43,37 @@ const EventList: React.FC<EventListProps> = ({
               {({ open }) => {
                 return (
                   <>
-                    <Disclosure.Button className="relative mt-2 rounded-md bg-gray-300">
-                      <p className="truncate p-2 px-6 font-bold">
-                        {event.name}
-                      </p>
-                      <motion.div
-                        className="absolute right-2 top-0 flex h-full items-center justify-center"
-                        variants={chevronVariants}
-                        animate={open ? "up" : "down"}
-                      >
-                        <FaChevronDown />
-                      </motion.div>
-                    </Disclosure.Button>
+                    <div className="mt-2 flex w-auto gap-2">
+                      <Disclosure.Button className="relative w-full max-w-[calc(100%-48px-48px)] rounded-md bg-gray-300">
+                        <p className="truncate p-2 px-6 font-bold">
+                          {event.name}
+                        </p>
+                        <motion.div
+                          className="absolute right-2 top-0 flex h-full items-center justify-center"
+                          variants={chevronVariants}
+                          animate={open ? "up" : "down"}
+                        >
+                          <FaChevronDown />
+                        </motion.div>
+                      </Disclosure.Button>
+                      {event.stages.length === 0 && (
+                        <Button
+                          className="h-10 max-h-full w-10"
+                          onClick={() => {
+                            setModalState({
+                              open: true,
+                              title: `Add a category under ${event.name}`,
+                              parentEventId: event.id,
+                            });
+                          }}
+                        >
+                          <RiMenuAddFill />
+                        </Button>
+                      )}
+                      <Button className="h-10 max-h-full bg-red">
+                        <BsFillTrashFill />
+                      </Button>
+                    </div>
                     <AnimatePresence>
                       {open && (
                         <Disclosure.Panel
@@ -81,7 +86,6 @@ const EventList: React.FC<EventListProps> = ({
                         >
                           <EventList
                             eventList={event.childEvents || []}
-                            parentEvent={event}
                             setModalState={setModalState}
                           />
                           {event.stages && !event.childEvents && (
@@ -89,13 +93,13 @@ const EventList: React.FC<EventListProps> = ({
                               {event.stages.map((stage) => (
                                 <div
                                   key={stage.stageCode}
-                                  className="mt-2 rounded-md bg-gray-300 p-2 text-center font-bold"
+                                  className="mt-2 max-w-[calc(100%-80px)] rounded-md bg-gray-300 p-2 text-center font-bold"
                                 >
                                   {stage.stageCode}
                                 </div>
                               ))}
-                              <Button className="mt-2 w-full py-2">
-                                Add Stage in {event.name}
+                              <Button className="mt-2 w-[calc(100%-80px)] py-2">
+                                Add Stage
                               </Button>
                             </>
                           )}

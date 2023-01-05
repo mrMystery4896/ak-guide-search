@@ -29,7 +29,6 @@ const EditEventList: React.FC<EditEventListProps> = ({
       <EventList
         eventList={eventList}
         className={className}
-        parentEvent={null}
         setModalState={setAddEventModalState}
       />
       <Button
