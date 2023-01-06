@@ -4,6 +4,8 @@ import { useState } from "react";
 import React from "react";
 import AddEventModal from "./AddEventModal";
 import EventList from "./EventList";
+import AddStageModal from "./AddStageModal";
+import { boolean } from "zod";
 
 interface EditEventListProps {
   eventList: EventWithChildren[];
@@ -19,6 +21,13 @@ const EditEventList: React.FC<EditEventListProps> = ({
     title: "",
     parentEventId: "",
   });
+  const [addStageModalState, setAddStageModalState] = useState<{
+    open: boolean;
+    event?: EventWithChildren;
+  }>({
+    open: false,
+    event: undefined,
+  });
 
   return (
     <>
@@ -26,22 +35,27 @@ const EditEventList: React.FC<EditEventListProps> = ({
         modalState={addEventModalState}
         setModalState={setAddEventModalState}
       />
+      <AddStageModal
+        modalState={addStageModalState}
+        setModalState={setAddStageModalState}
+      />
       <EventList
         eventList={eventList}
         className={className}
-        setModalState={setAddEventModalState}
+        setAddEventModalState={setAddEventModalState}
+        setAddStageModalState={setAddStageModalState}
       />
       <Button
-        className="mt-2 w-full py-2"
+        className="-z-50 mt-2 w-full py-2"
         onClick={() => {
           setAddEventModalState({
             open: true,
-            title: "Add a category under Root",
+            title: "Add a new category",
             parentEventId: "",
           });
         }}
       >
-        Add a category under Root
+        Add a new category
       </Button>
     </>
   );
