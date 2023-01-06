@@ -6,9 +6,7 @@ import { FaChevronDown } from "react-icons/fa";
 import { EventWithChildren } from "../utils/common-types";
 import Button from "./Button";
 import { RiMenuAddFill } from "react-icons/ri";
-import { BsFillTrashFill, BsThreeDotsVertical, BsTrash } from "react-icons/bs";
-import { createPortal } from "react-dom";
-import Tippy from "@tippyjs/react/headless";
+import { BsFillTrashFill, BsThreeDotsVertical } from "react-icons/bs";
 
 interface EventListProps {
   eventList: EventWithChildren[];
@@ -115,20 +113,30 @@ const EventList: React.FC<EventListProps> = ({
                                   aria-orientation="vertical"
                                   aria-labelledby="options-menu"
                                 >
-                                  <Menu.Item>
+                                  <Menu.Item disabled={event.stages.length > 0}>
                                     {({ active, close }) => {
                                       return (
                                         <div>
                                           <div
                                             className={`${
-                                              active ? "bg-primary" : ""
-                                            } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                              active &&
+                                              event.stages.length === 0
+                                                ? "bg-primary"
+                                                : ""
+                                            } ${
+                                              event.stages.length > 0
+                                                ? "cursor-not-allowed opacity-50"
+                                                : "cursor-pointer"
+                                            } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                             onClick={() => {
+                                              if (event.stages.length > 0)
+                                                return;
                                               setAddEventModalState({
                                                 open: true,
                                                 title: `Add a category under ${event.name}`,
                                                 parentEventId: event.id,
                                               });
+                                              close();
                                             }}
                                           >
                                             <span>
@@ -207,7 +215,7 @@ const EventList: React.FC<EventListProps> = ({
                                                         } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                                       >
                                                         <span>
-                                                          <BsTrash />
+                                                          <BsFillTrashFill />
                                                         </span>
                                                         Delete Stage
                                                       </div>
