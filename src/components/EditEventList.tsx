@@ -6,6 +6,9 @@ import AddEventModal from "./AddEventModal";
 import EventList from "./EventList";
 import AddStageModal from "./AddStageModal";
 import { boolean } from "zod";
+import { Stage } from "@prisma/client";
+import EditModal from "./EditModal";
+import DeleteModal from "./DeleteModal";
 
 interface EditEventListProps {
   eventList: EventWithChildren[];
@@ -28,6 +31,24 @@ const EditEventList: React.FC<EditEventListProps> = ({
     open: false,
     event: undefined,
   });
+  const [editModalState, setEditModalState] = useState<{
+    open: boolean;
+    event?: EventWithChildren;
+    stage?: Stage;
+  }>({
+    open: false,
+    event: undefined,
+    stage: undefined,
+  });
+  const [deleteModalState, setDeleteModalState] = useState<{
+    open: boolean;
+    event?: EventWithChildren;
+    stage?: Stage;
+  }>({
+    open: false,
+    event: undefined,
+    stage: undefined,
+  });
 
   return (
     <>
@@ -39,11 +60,21 @@ const EditEventList: React.FC<EditEventListProps> = ({
         modalState={addStageModalState}
         setModalState={setAddStageModalState}
       />
+      <EditModal
+        modalState={editModalState}
+        setModalState={setEditModalState}
+      />
+      <DeleteModal
+        modalState={deleteModalState}
+        setModalState={setDeleteModalState}
+      />
       <EventList
         eventList={eventList}
         className={className}
         setAddEventModalState={setAddEventModalState}
         setAddStageModalState={setAddStageModalState}
+        setEditModalState={setEditModalState}
+        setDeleteModalState={setDeleteModalState}
       />
       <Button
         className="-z-50 mt-2 w-full py-2"

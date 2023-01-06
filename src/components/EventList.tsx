@@ -4,9 +4,10 @@ import React, { useEffect } from "react";
 import { Dispatch, SetStateAction } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import { EventWithChildren } from "../utils/common-types";
-import Button from "./Button";
 import { RiMenuAddFill } from "react-icons/ri";
 import { BsFillTrashFill, BsThreeDotsVertical } from "react-icons/bs";
+import { MdModeEdit } from "react-icons/md";
+import { Stage } from "@prisma/client";
 
 interface EventListProps {
   eventList: EventWithChildren[];
@@ -22,6 +23,20 @@ interface EventListProps {
     SetStateAction<{
       open: boolean;
       event?: EventWithChildren;
+    }>
+  >;
+  setEditModalState: Dispatch<
+    SetStateAction<{
+      open: boolean;
+      event?: EventWithChildren;
+      stage?: Stage;
+    }>
+  >;
+  setDeleteModalState: Dispatch<
+    SetStateAction<{
+      open: boolean;
+      event?: EventWithChildren;
+      stage?: Stage;
     }>
   >;
 }
@@ -40,6 +55,8 @@ const EventList: React.FC<EventListProps> = ({
   className,
   setAddEventModalState,
   setAddStageModalState,
+  setEditModalState,
+  setDeleteModalState,
 }) => {
   const divRef = React.useRef<HTMLDivElement>(null);
 
@@ -62,7 +79,7 @@ const EventList: React.FC<EventListProps> = ({
       id="eventContainer"
       ref={divRef}
     >
-      {eventList.map((event, i) => {
+      {eventList.map((event) => {
         return (
           <React.Fragment key={event.id}>
             <Disclosure>
@@ -70,17 +87,26 @@ const EventList: React.FC<EventListProps> = ({
                 return (
                   <>
                     <div className="relative mt-2 flex w-auto gap-2">
-                      <Disclosure.Button className="relative w-full max-w-[calc(100%-48px)] rounded-md bg-gray-300">
+                      <Disclosure.Button
+                        className={`relative w-full max-w-[calc(100%-48px)] rounded-md bg-gray-300 ${
+                          event.stages.length > 0 || event?.childEvents?.length
+                            ? "cursor-pointer"
+                            : "pointer-events-none cursor-default"
+                        }`}
+                      >
                         <p className="truncate p-2 px-6 font-bold">
                           {event.name}
                         </p>
-                        <motion.div
-                          className="absolute right-2 top-0 flex h-full items-center justify-center"
-                          variants={chevronVariants}
-                          animate={open ? "up" : "down"}
-                        >
-                          <FaChevronDown />
-                        </motion.div>
+                        {(event.stages.length > 0 ||
+                          event?.childEvents?.length) && (
+                          <motion.div
+                            className={`absolute right-2 top-0 flex h-full items-center justify-center`}
+                            variants={chevronVariants}
+                            animate={open ? "up" : "down"}
+                          >
+                            <FaChevronDown />
+                          </motion.div>
+                        )}
                       </Disclosure.Button>
                       <Menu>
                         {({ open }) => (
@@ -113,36 +139,119 @@ const EventList: React.FC<EventListProps> = ({
                                   aria-orientation="vertical"
                                   aria-labelledby="options-menu"
                                 >
-                                  <Menu.Item disabled={event.stages.length > 0}>
+                                  {event.stages.length === 0 ? (
+                                    <Menu.Item
+                                      disabled={event.stages.length > 0}
+                                    >
+                                      {({ active, close }) => {
+                                        return (
+                                          <div>
+                                            <div
+                                              className={`${
+                                                active &&
+                                                event.stages.length === 0
+                                                  ? "bg-primary"
+                                                  : ""
+                                              } ${
+                                                event.stages.length > 0
+                                                  ? "cursor-not-allowed opacity-50"
+                                                  : "cursor-pointer"
+                                              } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                              onClick={() => {
+                                                if (event.stages.length > 0)
+                                                  return;
+                                                setAddEventModalState({
+                                                  open: true,
+                                                  title: `Add a category under ${event.name}`,
+                                                  parentEventId: event.id,
+                                                });
+                                                close();
+                                              }}
+                                            >
+                                              <span>
+                                                <RiMenuAddFill />
+                                              </span>
+                                              Add Category
+                                            </div>
+                                          </div>
+                                        );
+                                      }}
+                                    </Menu.Item>
+                                  ) : null}
+                                  {!event.childEvents?.length ? (
+                                    <Menu.Item>
+                                      {({ active, close }) => {
+                                        return (
+                                          <div>
+                                            <div
+                                              className={`${
+                                                active ? "bg-primary" : ""
+                                              } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                              onClick={() => {
+                                                setAddStageModalState({
+                                                  open: true,
+                                                  event: event,
+                                                });
+                                                close();
+                                              }}
+                                            >
+                                              <span>
+                                                <RiMenuAddFill />
+                                              </span>
+                                              Add Stage
+                                            </div>
+                                          </div>
+                                        );
+                                      }}
+                                    </Menu.Item>
+                                  ) : null}
+                                  <Menu.Item>
                                     {({ active, close }) => {
                                       return (
                                         <div>
                                           <div
                                             className={`${
-                                              active &&
-                                              event.stages.length === 0
-                                                ? "bg-primary"
-                                                : ""
-                                            } ${
-                                              event.stages.length > 0
-                                                ? "cursor-not-allowed opacity-50"
-                                                : "cursor-pointer"
-                                            } flex flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                              active ? "bg-primary" : ""
+                                            } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                             onClick={() => {
-                                              if (event.stages.length > 0)
-                                                return;
-                                              setAddEventModalState({
+                                              setEditModalState({
                                                 open: true,
-                                                title: `Add a category under ${event.name}`,
-                                                parentEventId: event.id,
+                                                event: event,
+                                                stage: undefined,
                                               });
                                               close();
                                             }}
                                           >
                                             <span>
-                                              <RiMenuAddFill />
+                                              <MdModeEdit />
                                             </span>
-                                            Add Category
+                                            Edit Category
+                                          </div>
+                                        </div>
+                                      );
+                                    }}
+                                  </Menu.Item>
+                                  <Menu.Item>
+                                    {({ active, close }) => {
+                                      return (
+                                        <div>
+                                          <div
+                                            className={`${
+                                              active ? "bg-primary" : ""
+                                            } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                            onClick={() => {
+                                              setDeleteModalState({
+                                                open: true,
+                                                event: event,
+                                                stage: undefined,
+                                              });
+                                              close();
+                                            }}
+                                          >
+                                            <span>
+                                              <BsFillTrashFill />
+                                            </span>
+                                            Delete Category
                                           </div>
                                         </div>
                                       );
@@ -169,6 +278,8 @@ const EventList: React.FC<EventListProps> = ({
                             eventList={event.childEvents || []}
                             setAddEventModalState={setAddEventModalState}
                             setAddStageModalState={setAddStageModalState}
+                            setEditModalState={setEditModalState}
+                            setDeleteModalState={setDeleteModalState}
                           />
                           {event.stages && !event.childEvents && (
                             <>
@@ -184,10 +295,7 @@ const EventList: React.FC<EventListProps> = ({
                                   <Menu as="div" className="relative z-10">
                                     {({ open }) => (
                                       <>
-                                        <Menu.Button
-                                          // as={Button}
-                                          className="relative z-10 flex h-10 max-h-full w-10 items-center justify-center rounded-md bg-primary focus:outline-none"
-                                        >
+                                        <Menu.Button className="relative z-10 flex h-10 max-h-full w-10 items-center justify-center rounded-md bg-primary focus:outline-none">
                                           <BsThreeDotsVertical />
                                         </Menu.Button>
                                         <AnimatePresence>
@@ -213,6 +321,42 @@ const EventList: React.FC<EventListProps> = ({
                                                             ? "bg-primary"
                                                             : ""
                                                         } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                                        onClick={() => {
+                                                          setEditModalState({
+                                                            open: true,
+                                                            event: event,
+                                                            stage: stage,
+                                                          });
+                                                          close();
+                                                        }}
+                                                      >
+                                                        <span>
+                                                          <MdModeEdit />
+                                                        </span>
+                                                        Edit Stage
+                                                      </div>
+                                                    </div>
+                                                  );
+                                                }}
+                                              </Menu.Item>
+                                              <Menu.Item>
+                                                {({ active, close }) => {
+                                                  return (
+                                                    <div>
+                                                      <div
+                                                        className={`${
+                                                          active
+                                                            ? "bg-primary"
+                                                            : ""
+                                                        } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                                        onClick={() => {
+                                                          setDeleteModalState({
+                                                            open: true,
+                                                            event: event,
+                                                            stage: stage,
+                                                          });
+                                                          close();
+                                                        }}
                                                       >
                                                         <span>
                                                           <BsFillTrashFill />
@@ -231,7 +375,7 @@ const EventList: React.FC<EventListProps> = ({
                                   </Menu>
                                 </div>
                               ))}
-                              <Button
+                              {/* <Button
                                 className="-z-50 mt-2 w-[calc(100%-80px)] truncate py-2"
                                 onClick={() => {
                                   setAddStageModalState({
@@ -241,7 +385,7 @@ const EventList: React.FC<EventListProps> = ({
                                 }}
                               >
                                 Add Stage
-                              </Button>
+                              </Button> */}
                             </>
                           )}
                         </Disclosure.Panel>
