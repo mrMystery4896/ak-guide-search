@@ -36,6 +36,29 @@ export const eventRouter = router({
           message: "Start date must be before end date.",
         });
       }
+      // An event can only have either child events or stages, not both.
+      if (input.parentEventId) {
+        const parentEvent = await ctx.prisma.event.findUnique({
+          where: { id: input.parentEventId },
+          include: {
+            stages: true,
+            childEvents: true,
+          }
+        });
+        if (!parentEvent) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Parent category does not exist.",
+          });
+        }
+        if(parentEvent.stages.length > 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Parent event already has stages.",
+          });
+        }
+      }
+
       try {
         return await ctx.prisma.event.create({
           data: {

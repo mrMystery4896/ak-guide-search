@@ -8,6 +8,7 @@ import { RiMenuAddFill } from "react-icons/ri";
 import { BsFillTrashFill, BsThreeDotsVertical } from "react-icons/bs";
 import { MdModeEdit } from "react-icons/md";
 import { Stage } from "@prisma/client";
+import { TiPlus } from "react-icons/ti";
 
 interface EventListProps {
   eventList: EventWithChildren[];
@@ -111,10 +112,7 @@ const EventList: React.FC<EventListProps> = ({
                       <Menu>
                         {({ open }) => (
                           <>
-                            <Menu.Button
-                              // as={Button}
-                              className="relative z-10 flex h-10 max-h-full w-10 items-center justify-center rounded-md bg-primary focus:outline-none"
-                            >
+                            <Menu.Button className="relative z-10 flex h-10 max-h-full w-10 items-center justify-center rounded-md bg-primary focus:outline-none">
                               <BsThreeDotsVertical />
                             </Menu.Button>
                             <AnimatePresence>
@@ -196,7 +194,7 @@ const EventList: React.FC<EventListProps> = ({
                                               }}
                                             >
                                               <span>
-                                                <RiMenuAddFill />
+                                                <TiPlus />
                                               </span>
                                               Add Stage
                                             </div>

@@ -47,7 +47,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
           <LoadingSpinner className="align-middle" />
         ) : session.status === "authenticated" ? (
           <>
-            <Menu as="div" className="relative md:h-10">
+            <Menu as="div" className="relative h-8 md:h-10">
               {({ open }) => (
                 <>
                   <Menu.Button className="focus:outline-none">

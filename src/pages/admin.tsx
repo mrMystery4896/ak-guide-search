@@ -99,7 +99,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   });
   const eventList = await prisma?.event.findMany({
     include: {
-      stages: true,
+      stages: {
+        orderBy: {
+          stageCode: "asc",
+        },
+      },
     },
   });
 

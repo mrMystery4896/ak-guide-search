@@ -26,8 +26,6 @@ const guideCard: Variants = {
 };
 
 const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
-  const isXlScreen = useMediaQuery({ query: "(min-width: 1280px)" });
-
   return (
     <motion.div
       variants={guideCard}
@@ -67,15 +65,14 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                 <li
                   key={operator.id}
                   className={
-                    `relative min-h-[40px] min-w-[40px] overflow-hidden rounded-full md:h-10 md:w-10 xl:h-12 xl:w-12` +
+                    `relative h-10 w-10 overflow-hidden rounded-full xl:h-12 xl:w-12` +
                     ` ${translateRarityToClassName(operator.rarity)}`
                   }
                 >
                   <Image
                     src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
                     alt={operator.id}
-                    width={isXlScreen ? 48 : 40}
-                    height={isXlScreen ? 48 : 40}
+                    fill
                     style={{ objectFit: "contain" }}
                   />
                 </li>

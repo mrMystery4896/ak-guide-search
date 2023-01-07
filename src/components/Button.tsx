@@ -14,14 +14,14 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <button
       className={twMerge(
-        "text-white md:px:4 relative flex items-center justify-center rounded-md bg-primary px-3 py-1 text-sm disabled:bg-primary/50 md:py-2 md:text-base",
+        "md:px:4 relative flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm text-white disabled:bg-primary/50 md:py-2 md:text-base",
         className
       )}
       {...props}
       disabled={isLoading}
     >
       <svg
-        className={`text-white absolute top-0 left-0 bottom-0 right-0 m-auto h-3 w-3 animate-spin align-middle md:h-5 md:w-5 ${
+        className={`absolute top-0 left-0 bottom-0 right-0 m-auto h-3 w-3 animate-spin align-middle text-white md:h-5 md:w-5 ${
           isLoading ? "" : "hidden"
         }`}
         xmlns="http://www.w3.org/2000/svg"

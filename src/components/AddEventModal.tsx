@@ -212,7 +212,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                       onChange={(e) => {
                         setHasDuration(e.target.checked);
                       }}
-                      className="h-3 w-3 rounded text-primary md:h-4 md:w-4"
+                      className="h-3 w-3 rounded text-primary"
                       id="hasDuration"
                     />
                     <label

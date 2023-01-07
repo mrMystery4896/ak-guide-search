@@ -64,7 +64,7 @@ export const guideRouter = router({
           tags: {
             connect: input.tags.map((id) => ({ id })),
           },
-          status: "PENDING",
+          status: ctx.session.user.role === "USER" ? "PENDING" : "APPROVED",
           submittedAt: new Date(),
           submittedBy: {
             connect: {

@@ -26,7 +26,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           className={twMerge(
-            `rounded-md border-2 border-gray-300 bg-gray-300 px-3 py-1 text-sm placeholder:text-sm placeholder:text-gray-100 focus:outline-none md:py-2 md:text-base placeholder:md:text-base ${
+            `rounded-md border-2 border-gray-300 bg-gray-300 px-3 py-2 text-sm placeholder:text-sm placeholder:text-gray-100 focus:outline-none md:py-2 md:text-base placeholder:md:text-base ${
               errorMessage ? "border-red" : "focus:border-primary"
             }`,
             className
