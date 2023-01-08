@@ -9,6 +9,7 @@ import { BsFillTrashFill, BsThreeDotsVertical } from "react-icons/bs";
 import { MdModeEdit } from "react-icons/md";
 import { Stage } from "@prisma/client";
 import { TiPlus } from "react-icons/ti";
+import { BiMove } from "react-icons/bi";
 
 interface EventListProps {
   eventList: EventWithChildren[];
@@ -72,7 +73,7 @@ const EventList: React.FC<EventListProps> = ({
         }
       }
     }
-  }, []);
+  });
 
   return (
     <div
@@ -134,7 +135,6 @@ const EventList: React.FC<EventListProps> = ({
                                   }}
                                   className="absolute top-10 right-0 z-50 rounded-md border border-gray-500 bg-gray-300 p-1 shadow-2xl shadow-gray-800 overflow-y-hidden focus:outline-none"
                                   role="menu"
-                                  aria-orientation="vertical"
                                   aria-labelledby="options-menu"
                                 >
                                   {event.stages.length === 0 ? (
@@ -238,6 +238,32 @@ const EventList: React.FC<EventListProps> = ({
                                               active ? "bg-primary" : ""
                                             } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                             onClick={() => {
+                                              setEditModalState({
+                                                open: true,
+                                                event: event,
+                                                stage: undefined,
+                                              });
+                                              close();
+                                            }}
+                                          >
+                                            <span>
+                                              <BiMove />
+                                            </span>
+                                            Move
+                                          </div>
+                                        </div>
+                                      );
+                                    }}
+                                  </Menu.Item>
+                                  <Menu.Item>
+                                    {({ active, close }) => {
+                                      return (
+                                        <div>
+                                          <div
+                                            className={`${
+                                              active ? "bg-primary" : ""
+                                            } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                            onClick={() => {
                                               setDeleteModalState({
                                                 open: true,
                                                 event: event,
@@ -306,7 +332,6 @@ const EventList: React.FC<EventListProps> = ({
                                               exit={{ opacity: 0, y: 10 }}
                                               className="absolute top-10 right-0 z-50 rounded-md border border-gray-500 bg-gray-300 p-1 shadow-2xl shadow-gray-800 overflow-y-hidden focus:outline-none"
                                               role="menu"
-                                              aria-orientation="vertical"
                                               aria-labelledby="options-menu"
                                             >
                                               <Menu.Item>
@@ -332,6 +357,34 @@ const EventList: React.FC<EventListProps> = ({
                                                           <MdModeEdit />
                                                         </span>
                                                         Edit Stage
+                                                      </div>
+                                                    </div>
+                                                  );
+                                                }}
+                                              </Menu.Item>
+                                              <Menu.Item>
+                                                {({ active, close }) => {
+                                                  return (
+                                                    <div>
+                                                      <div
+                                                        className={`${
+                                                          active
+                                                            ? "bg-primary"
+                                                            : ""
+                                                        } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
+                                                        onClick={() => {
+                                                          setEditModalState({
+                                                            open: true,
+                                                            event: event,
+                                                            stage: stage,
+                                                          });
+                                                          close();
+                                                        }}
+                                                      >
+                                                        <span>
+                                                          <BiMove />
+                                                        </span>
+                                                        Move Stage
                                                       </div>
                                                     </div>
                                                   );

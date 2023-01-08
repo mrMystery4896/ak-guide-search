@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { trpc } from "../utils/trpc";
 import Toast from "./Toast";
 import { useRouter } from "next/router";
+import { convertDateToUTCMinus7String } from "../utils/functions";
 
 interface AddEventModalProps {
   modalState: {
@@ -80,24 +81,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
       setErrors((prev) => ({ ...prev, name: "Name is required" }));
       hasError = true;
     }
-    if (
-      (!eventStartDateDayInputRef.current?.value ||
-        !eventStartDateMonthInputRef.current?.value ||
-        !eventStartDateYearInputRef.current?.value) &&
-      hasDuration
-    ) {
-      setErrors((prev) => ({ ...prev, startDate: "Start date is required" }));
-      hasError = true;
-    }
-    if (
-      (!eventEndDateDayInputRef.current?.value ||
-        !eventEndDateMonthInputRef.current?.value ||
-        !eventEndDateYearInputRef.current?.value) &&
-      hasDuration
-    ) {
-      setErrors((prev) => ({ ...prev, endDate: "End date is required" }));
-      hasError = true;
-    }
+
     // check if date is valid
     if (hasDuration) {
       const startDate = new Date(
@@ -129,19 +113,41 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
         hasError = true;
       }
     }
+    if (
+      (!eventStartDateDayInputRef.current?.value ||
+        !eventStartDateMonthInputRef.current?.value ||
+        !eventStartDateYearInputRef.current?.value) &&
+      hasDuration
+    ) {
+      setErrors((prev) => ({ ...prev, startDate: "Start date is required" }));
+      hasError = true;
+    }
+    if (
+      (!eventEndDateDayInputRef.current?.value ||
+        !eventEndDateMonthInputRef.current?.value ||
+        !eventEndDateYearInputRef.current?.value) &&
+      hasDuration
+    ) {
+      setErrors((prev) => ({ ...prev, endDate: "End date is required" }));
+      hasError = true;
+    }
     if (hasError) return;
     if (categoryNameInputRef.current?.value) {
       mutate({
         name: categoryNameInputRef.current.value,
         description: categoryDescriptionInputRef.current?.value || null,
         startDate: hasDuration
-          ? new Date(
-              `${eventStartDateYearInputRef.current?.value}-${eventStartDateMonthInputRef.current?.value}-${eventStartDateDayInputRef.current?.value}`
+          ? convertDateToUTCMinus7String(
+              eventStartDateDayInputRef.current?.value,
+              eventStartDateMonthInputRef.current?.value,
+              eventStartDateYearInputRef.current?.value
             )
           : null,
         endDate: hasDuration
-          ? new Date(
-              `${eventEndDateYearInputRef.current?.value}-${eventEndDateMonthInputRef.current?.value}-${eventEndDateDayInputRef.current?.value}`
+          ? convertDateToUTCMinus7String(
+              eventEndDateDayInputRef.current?.value,
+              eventEndDateMonthInputRef.current?.value,
+              eventEndDateYearInputRef.current?.value
             )
           : null,
         parentEventId: modalState.parentEventId || null,
@@ -177,7 +183,6 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 0.2 }}
-                layout
                 className="m-auto max-h-[80%] w-96 max-w-[80%] overflow-y-scroll rounded-md bg-gray-400 p-4 md:rounded-lg"
               >
                 <Dialog.Title className="mb-4 text-xl font-bold">

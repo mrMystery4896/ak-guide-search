@@ -11,6 +11,7 @@ import { BsFillGearFill } from "react-icons/bs";
 import { GoSignOut } from "react-icons/go";
 import { MdLibraryAdd } from "react-icons/md";
 import { AnimatePresence, motion } from "framer-motion";
+import { BiLogIn } from "react-icons/bi";
 
 interface NavbarProps {
   session: ReturnType<typeof useSession>;
@@ -160,7 +161,15 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
           </>
         ) : (
           <>
-            <Button onClick={() => signIn("google")}>Sign In</Button>
+            <Button
+              className="whitespace-nowrap"
+              onClick={() => signIn("google")}
+            >
+              <span className="block md:hidden">
+                <BiLogIn className="h-5 w-5" />
+              </span>
+              <span className="hidden md:block">Sign In</span>
+            </Button>
           </>
         )}
       </div>

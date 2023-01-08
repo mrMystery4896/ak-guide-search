@@ -26,6 +26,8 @@ const guideCard: Variants = {
 };
 
 const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
+  const isXlScreen = useMediaQuery({ query: "(min-width: 1280px)" });
+
   return (
     <motion.div
       variants={guideCard}
@@ -73,6 +75,9 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                     src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
                     alt={operator.id}
                     fill
+                    sizes="100%"
+                    // width={isXlScreen ? 48 : 40}
+                    // height={isXlScreen ? 48 : 40}
                     style={{ objectFit: "contain" }}
                   />
                 </li>

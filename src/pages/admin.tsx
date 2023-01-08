@@ -104,6 +104,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
           stageCode: "asc",
         },
       },
+      parentEvent: true,
     },
   });
 

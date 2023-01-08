@@ -16,3 +16,24 @@ export const translateRarityToClassName = (rarity: number) => {
       return "bg-gray-100";
   }
 };
+
+export const convertDateToUTCMinus7 = (date: Date | null) => {
+  if (!date) return null;
+  date = new Date(date);
+  return new Date(
+    Date.UTC(
+      new Date(date).getFullYear(),
+      new Date(date).getMonth(),
+      new Date(date).getDate()
+    )
+  );
+};
+
+export const convertDateToUTCMinus7String = (
+  day: string | null | undefined,
+  month: string | null | undefined,
+  year: string | null | undefined
+) => {
+  if (!day || !month || !year) return null;
+  return convertDateToUTCMinus7(new Date(`${month}/${day}/${year}`));
+};
