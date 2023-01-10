@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
+import { router } from "../server/trpc/trpc";
 import { EventWithChildren } from "../utils/common-types";
 import {
   convertDateToUTCMinus7,
@@ -254,7 +255,7 @@ const EditEventForm: React.FC<{
             </span>
           </div>
           <label className="text-sm text-slate-200" htmlFor="endDateDay">
-            End Date
+            End Date (UTC -7)
           </label>
           <div className="relative flex justify-start gap-2">
             <Input
@@ -316,11 +317,95 @@ const EditEventForm: React.FC<{
   );
 };
 
-const EditStageForm: React.FC<{ stage: Stage }> = ({ stage }) => {
+const EditStageForm: React.FC<{
+  stage: Stage;
+  setModalState: React.Dispatch<React.SetStateAction<EditModalState>>;
+}> = ({ stage, setModalState }) => {
+  const defaultError = {
+    stageCode: "",
+    stageName: "",
+  };
+  const [oldStage, setOldStage] = useState<Stage>(stage);
+  const [newStage, setNewStage] = useState(stage);
+  const [error, setError] = useState(defaultError);
+  const router = useRouter();
+
+  const { mutate, isLoading } = trpc.stage.editStage.useMutation({
+    onSuccess: () => {
+      setOldStage(newStage);
+      toast.custom((t) => (
+        <Toast
+          type="success"
+          message="Stage updated successfully"
+          visible={t.visible}
+          duration={t.duration}
+        />
+      ));
+      setModalState({ open: false, event: undefined, stage: undefined });
+      router.replace(router.asPath);
+    },
+    onError: (error) => {
+      toast.custom((t) => (
+        <Toast
+          type="error"
+          message={error.message}
+          visible={t.visible}
+          duration={t.duration}
+        />
+      ));
+    },
+  });
+
+  const updateStage = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(defaultError);
+    let hasError = false;
+    if (!newStage.stageName) {
+      setError({ ...error, stageName: "Stage name is required" });
+      hasError = true;
+    }
+    if (hasError) return;
+    mutate({
+      stageId: newStage.id,
+      stageName: newStage.stageName,
+      stageCode: newStage.stageCode,
+    });
+  };
+
   return (
-    <form>
-      <Input label="Stage Code" value={stage.stageCode} />
-      <Button type="submit">Save</Button>
+    <form onSubmit={updateStage}>
+      <Input
+        label="Stage Name"
+        id="stageName"
+        placeholder="Stage Name"
+        value={newStage.stageName}
+        onChange={(e) =>
+          setNewStage({ ...newStage, stageName: e.target.value })
+        }
+      />
+      <Input
+        label="Stage Code"
+        id="stageCode"
+        placeholder="e.g. CE-5"
+        value={newStage.stageCode || ""}
+        onChange={(e) =>
+          setNewStage({
+            ...newStage,
+            stageCode: e.target.value === "" ? null : e.target.value,
+          })
+        }
+      />
+      <Button
+        type="submit"
+        disabled={
+          oldStage.stageCode === newStage.stageCode &&
+          oldStage.stageName === newStage.stageName
+        }
+        isLoading={isLoading}
+        className="ml-auto"
+      >
+        Save
+      </Button>
     </form>
   );
 };
@@ -360,10 +445,13 @@ const EditModal: React.FC<EditModalProps> = ({ modalState, setModalState }) => {
                 className="m-auto max-h-[80%] w-96 max-w-[80%] overflow-y-scroll rounded-md bg-gray-400 p-4 md:rounded-lg"
               >
                 <Dialog.Title className="mb-4 text-xl font-bold">
-                  Edit {modalState.stage?.stageCode ?? modalState.event.name}
+                  Edit {modalState.stage?.stageName ?? modalState.event.name}
                 </Dialog.Title>
                 {modalState.stage ? (
-                  <EditStageForm stage={modalState.stage} />
+                  <EditStageForm
+                    stage={modalState.stage}
+                    setModalState={setModalState}
+                  />
                 ) : (
                   <EditEventForm
                     event={modalState.event}

@@ -79,7 +79,9 @@ model Operator {
 }
 
 model Stage {
-  stageCode String  @id
+  id        String  @id @default(cuid())
+  stageCode String? @unique
+  stageName String
   guides    Guide[]
   event     Event   @relation(fields: [eventId], references: [id])
   eventId   String

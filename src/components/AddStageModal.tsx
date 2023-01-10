@@ -32,9 +32,19 @@ const AddStageModal: React.FC<AddStageModalProps> = ({
   modalState,
   setModalState,
 }) => {
-  const [errorMessage, setErrorMessage] = useState("");
-  const [stageCodes, setStageCodes] = useState<string[]>([]);
+  const defaultError = {
+    stageCode: "",
+    stageName: "",
+  };
+  const [error, setError] = useState(defaultError);
+  const [stages, setStages] = useState<
+    {
+      stageCode: string | null;
+      stageName: string;
+    }[]
+  >([]);
   const stageCodeInputRef = useRef<HTMLInputElement>(null);
+  const stageNameInputRef = useRef<HTMLInputElement>(null);
   const reorderGroupRef = useRef<HTMLUListElement>(null);
   const router = useRouter();
 
@@ -49,8 +59,8 @@ const AddStageModal: React.FC<AddStageModalProps> = ({
         />
       ));
       setModalState({ open: false, event: undefined });
-      setStageCodes([]);
-      setErrorMessage("");
+      setStages([]);
+      setError(defaultError);
       router.replace(router.asPath);
     },
     onError: (error) => {
@@ -77,7 +87,7 @@ const AddStageModal: React.FC<AddStageModalProps> = ({
       ));
       return;
     }
-    if (stageCodes.length === 0) {
+    if (stages.length === 0) {
       toast.custom((t) => (
         <Toast
           message="Please add at least one stage."
@@ -90,7 +100,7 @@ const AddStageModal: React.FC<AddStageModalProps> = ({
     }
     mutate({
       parentEventId: modalState.event.id,
-      stageCodes: stageCodes,
+      stages: stages,
     });
   };
 
@@ -102,8 +112,8 @@ const AddStageModal: React.FC<AddStageModalProps> = ({
             open={modalState.open}
             onClose={() => {
               setModalState({ open: false, event: undefined });
-              setStageCodes([]);
-              setErrorMessage("");
+              setStages([]);
+              setError(defaultError);
             }}
             static
           >
@@ -130,17 +140,17 @@ const AddStageModal: React.FC<AddStageModalProps> = ({
                 </Dialog.Title>
                 <Reorder.Group
                   axis="y"
-                  onReorder={setStageCodes}
-                  values={stageCodes}
+                  onReorder={setStages}
+                  values={stages}
                   ref={reorderGroupRef}
                   className="cursor-pointer overflow-y-hidden"
                 >
                   <AnimatePresence mode="popLayout">
-                    {stageCodes.map((stageCode) => (
+                    {stages.map((stage) => (
                       <Reorder.Item
                         layout
-                        value={stageCode}
-                        key={stageCode}
+                        value={stage}
+                        key={stage.stageName}
                         className="mb-2 flex items-center justify-between rounded bg-primary p-2"
                         dragConstraints={reorderGroupRef}
                         dragElastic={0.1}
@@ -149,66 +159,115 @@ const AddStageModal: React.FC<AddStageModalProps> = ({
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.6, type: "spring" }}
                         onClick={() => {
-                          setStageCodes(
-                            stageCodes.filter((code) => code !== stageCode)
+                          setStages(
+                            stages.filter(
+                              (stageToBeRemoved) =>
+                                stageToBeRemoved.stageName !== stage.stageName
+                            )
                           );
                         }}
                       >
-                        <span>{stageCode}</span>
+                        <span>
+                          {stage.stageName}{" "}
+                          {stage.stageCode ? `(${stage.stageCode})` : ""}
+                        </span>
                         <TiMinus />
                       </Reorder.Item>
                     ))}
                   </AnimatePresence>
                 </Reorder.Group>
                 <div className="relative mb-4 flex flex-col md:mb-5">
-                  <label
-                    className="mb-1 text-xs text-slate-200 md:text-sm"
-                    htmlFor="stageCode"
-                  >
-                    Stage Code
-                  </label>
-
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
-                      setErrorMessage("");
-                      if (!stageCodeInputRef.current?.value) {
-                        setErrorMessage("Stage code cannot be empty");
-                        return;
-                      }
+                      setError(defaultError);
+                      let hasError = false;
                       if (
-                        stageCodes.includes(stageCodeInputRef.current.value)
+                        stageNameInputRef.current &&
+                        stageCodeInputRef.current
                       ) {
-                        setErrorMessage("Stage code already exists");
-                        return;
+                        if (!stageNameInputRef.current.value) {
+                          setError({
+                            ...defaultError,
+                            stageName: "Stage name is required",
+                          });
+                          hasError = true;
+                          return;
+                        }
+                        if (
+                          stages
+                            .map((stage) => stage.stageName)
+                            .includes(stageNameInputRef.current.value)
+                        ) {
+                          setError({
+                            ...defaultError,
+                            stageName: "Stage name already exists",
+                          });
+                          hasError = true;
+                        }
+                        if (
+                          stages
+                            .map((stage) => stage.stageCode)
+                            .filter(
+                              (code) => code !== undefined || code !== null
+                            )
+                            .includes(stageCodeInputRef.current.value)
+                        ) {
+                          setError({
+                            ...defaultError,
+                            stageCode: "Stage code already exists",
+                          });
+                          hasError = true;
+                        }
+                        if (hasError) return;
+                        setStages([
+                          ...stages,
+                          {
+                            stageName: stageNameInputRef.current?.value || "",
+                            stageCode: stageCodeInputRef.current?.value || null,
+                          },
+                        ]);
+                        stageCodeInputRef.current.value = "";
+                        stageNameInputRef.current.value = "";
                       }
-                      setStageCodes([
-                        ...stageCodes,
-                        stageCodeInputRef.current.value,
-                      ]);
-                      stageCodeInputRef.current.value = "";
                     }}
-                    className="flex justify-between"
                   >
-                    <input
-                      className={`mr-4 w-full rounded-md border-2 border-gray-300 bg-gray-300 px-3 py-2 text-sm placeholder:text-sm placeholder:text-gray-100 focus:outline-none md:text-base placeholder:md:text-base ${
-                        errorMessage ? "border-red" : "focus:border-primary"
-                      }`}
-                      id="stageCode"
-                      placeholder="Stage Code (e.g. CE-5)"
-                      ref={stageCodeInputRef}
-                    />
-                    <Button>
-                      <TiPlus />
-                    </Button>
+                    <div className="flex flex-col">
+                      <label
+                        className="mb-1 text-xs text-slate-200 md:text-sm"
+                        htmlFor="stageCode"
+                      >
+                        Stage Code (Optional)
+                      </label>
+                      <Input
+                        className="w-24"
+                        id="stageCode"
+                        placeholder="e.g. CE-5"
+                        ref={stageCodeInputRef}
+                        errorMessage={error.stageCode}
+                      />
+                    </div>
+                    <div>
+                      <label
+                        className="mb-1 text-xs text-slate-200 md:text-sm"
+                        htmlFor="stageName"
+                      >
+                        Stage Name
+                      </label>
+                      <div className="mb-2 flex justify-between gap-2">
+                        <Input
+                          inputDivClassName="mb-0 md:mb-0 w-full"
+                          id="stageName"
+                          placeholder="Stage Name"
+                          ref={stageNameInputRef}
+                          errorMessage={error.stageName}
+                        />
+                        <Button>
+                          <TiPlus />
+                        </Button>
+                      </div>
+                    </div>
                   </form>
-                  <span
-                    className={`absolute -bottom-5 h-5 text-sm font-semibold text-red ${
-                      errorMessage ? "" : "invisible"
-                    }`}
-                  >
-                    {errorMessage}
-                  </span>
                 </div>
                 <Button
                   className="ml-auto"

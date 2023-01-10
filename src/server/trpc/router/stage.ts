@@ -17,7 +17,19 @@ export const stageRouter = router({
   addStage: protectedProcedure
     .input(
       z.object({
-        stageCodes: z.array(z.string().min(1)),
+        stages: z.array(
+          z.object({
+            stageCode: z
+              .string()
+              .min(1, {
+                message: "Stage code must include at least 1 character",
+              })
+              .nullable(),
+            stageName: z.string().min(1, {
+              message: "Stage name must include at least 1 character",
+            }),
+          })
+        ),
         parentEventId: z.string().cuid({ message: "Invalid event." }),
       })
     )
@@ -29,12 +41,19 @@ export const stageRouter = router({
         });
 
       // check if stageCode is unique
-      let existingMatchingStage: Stage[];
+      let existingMatchingStage: Stage | null;
       try {
-        existingMatchingStage = await ctx.prisma.stage.findMany({
+        existingMatchingStage = await ctx.prisma.stage.findFirst({
           where: {
             stageCode: {
-              in: input.stageCodes,
+              in: input.stages
+                .map((stageCode) => stageCode.stageCode)
+                .filter(
+                  (stageCode) =>
+                    stageCode !== null &&
+                    stageCode !== undefined &&
+                    stageCode !== ""
+                ) as string[],
             },
           },
         });
@@ -45,7 +64,7 @@ export const stageRouter = router({
         });
       }
 
-      if (existingMatchingStage.length > 0)
+      if (existingMatchingStage !== null)
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Stage already exists.",
@@ -54,12 +73,77 @@ export const stageRouter = router({
       // create stage
       try {
         await ctx.prisma.stage.createMany({
-          data: input.stageCodes.map((stageCode) => ({
-            stageCode,
+          data: input.stages.map((stage) => ({
+            stageCode: stage.stageCode || null,
+            stageName: stage.stageName,
             eventId: input.parentEventId,
           })),
         });
       } catch (e) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong",
+        });
+      }
+    }),
+  editStage: protectedProcedure
+    .input(
+      z.object({
+        stageId: z.string().cuid({ message: "Invalid stage." }),
+        stageName: z.string().min(1, { message: "Stage name is required." }),
+        stageCode: z.string().min(1).nullable(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user.role !== "ADMIN")
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to perform this action.",
+        });
+
+      if (input.stageCode) {
+        let existingStage: Stage | null;
+        try {
+          existingStage = await ctx.prisma.stage.findFirst({
+            where: {
+              stageCode: input.stageCode,
+            },
+          });
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Something went wrong",
+          });
+        }
+
+        if (existingStage !== null) {
+          if (existingStage.id !== input.stageId) {
+            throw new TRPCError({
+              code: "BAD_REQUEST",
+              message: "Stage code already exists.",
+            });
+          }
+        }
+      }
+
+      if (!input.stageName) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Stage name is required.",
+        });
+      }
+
+      try {
+        await ctx.prisma.stage.update({
+          where: {
+            id: input.stageId,
+          },
+          data: {
+            stageName: input.stageName,
+            stageCode: input.stageCode,
+          },
+        });
+      } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Something went wrong",

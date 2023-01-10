@@ -233,7 +233,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         className="text-sm text-slate-200"
                         htmlFor="startDateDay"
                       >
-                        Start Date
+                        Start Date (UTC -7)
                       </label>
                       <div className="relative flex justify-start gap-2">
                         <Input
@@ -291,7 +291,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                         className="text-sm text-slate-200"
                         htmlFor="endDateDay"
                       >
-                        End Date
+                        End Date (UTC -7)
                       </label>
                       <div className="relative flex justify-start gap-2">
                         <Input

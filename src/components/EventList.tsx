@@ -309,12 +309,19 @@ const EventList: React.FC<EventListProps> = ({
                             <>
                               {event.stages.map((stage, i) => (
                                 <div
-                                  key={stage.stageCode}
+                                  key={stage.id}
                                   className="relative mt-2 flex w-full max-w-[calc(100%-80px)] gap-2"
                                   style={{ zIndex: `-${i}` }}
                                 >
-                                  <div className="w-full max-w-[calc(100%-80px)] rounded-md bg-gray-300 p-2 text-center font-bold">
-                                    {stage.stageCode}
+                                  <div className="w-full max-w-[calc(100%-80px)] rounded-md bg-gray-300 p-2 px-4 text-center">
+                                    <p className="truncate">
+                                      {stage.stageCode && (
+                                        <span>
+                                          <b>{stage.stageCode} - </b>
+                                        </span>
+                                      )}
+                                      {stage.stageName}
+                                    </p>
                                   </div>
                                   <Menu as="div" className="relative z-10">
                                     {({ open }) => (
