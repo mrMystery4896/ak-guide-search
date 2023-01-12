@@ -30,7 +30,8 @@ export const guideRouter = router({
         stageId: z.string().min(1),
         operatorIds: z.array(z.string().min(1)),
         tags: z.array(z.string().cuid()),
-        uploadedById: z.string(),
+        uploadedById: z.string().min(1),
+        uploadedByName: z.string().min(1),
         thumbnailUrl: z.string().url(),
       })
     )
@@ -49,34 +50,47 @@ export const guideRouter = router({
         });
       }
 
-      return ctx.prisma.guide.create({
-        data: {
-          id: input.id,
-          title: input.title,
-          stage: {
-            connect: {
-              id: input.stageId,
+      try {
+        return ctx.prisma.guide.create({
+          data: {
+            id: input.id,
+            title: input.title,
+            stage: {
+              connect: {
+                id: input.stageId,
+              },
+            },
+            operators: {
+              connect: input.operatorIds.map((id) => ({ id })),
+            },
+            tags: {
+              connect: input.tags.map((id) => ({ id })),
+            },
+            status: ctx.session.user.role === "USER" ? "PENDING" : "APPROVED",
+            submittedAt: new Date(),
+            submittedBy: {
+              connect: {
+                id: ctx.session.user.id,
+              },
+            },
+            uploadedBy: {
+              connectOrCreate: {
+                create: {
+                  id: input.uploadedById,
+                  name: input.uploadedByName,
+                },
+                where: {
+                  id: input.uploadedById,
+                },
+              },
             },
           },
-          operators: {
-            connect: input.operatorIds.map((id) => ({ id })),
-          },
-          tags: {
-            connect: input.tags.map((id) => ({ id })),
-          },
-          status: ctx.session.user.role === "USER" ? "PENDING" : "APPROVED",
-          submittedAt: new Date(),
-          submittedBy: {
-            connect: {
-              id: ctx.session.user.id,
-            },
-          },
-          uploadedBy: {
-            connect: {
-              id: input.uploadedById,
-            },
-          },
-        },
-      });
+        });
+      } catch (e) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong. Please try again later",
+        });
+      }
     }),
 });

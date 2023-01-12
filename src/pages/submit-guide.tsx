@@ -17,6 +17,10 @@ import SelectTagDropdown from "../components/SelectTagDropdown";
 import { EventWithChildren } from "../utils/common-types";
 import SelectStageMenu from "../components/SelectStageMenu";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
+import Toast from "../components/Toast";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 
 interface SubmitGuideProps {
   operatorList: Operator[];
@@ -33,8 +37,9 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
 
   const [selectedOperators, setSelectedOperators] = useState<Operator[]>([]);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
+  const session = useSession();
+  const router = useRouter();
 
   const {
     data: youtubeData,
@@ -42,8 +47,37 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     isLoading: videoIsLoading,
     mutate,
   } = trpc.youtube.getVideo.useMutation();
-  const { error: submitGuideError, mutate: submitGuide } =
-    trpc.guide.submitGuide.useMutation();
+  const {
+    error: submitGuideError,
+    mutate: submitGuide,
+    isLoading: isSubmitting,
+  } = trpc.guide.submitGuide.useMutation({
+    onSuccess: () => {
+      toast.custom((t) => (
+        <Toast
+          message={`Guide submitted successfully!${
+            session.data?.user?.role === "ADMIN"
+              ? " It will show up once a moderator have approved it."
+              : ""
+          }`}
+          visible={t.visible}
+          duration={3000}
+          type="success"
+        />
+      ));
+      router.push("/");
+    },
+    onError: (error) => {
+      toast.custom((t) => (
+        <Toast
+          message="Something went wrong. Please try again later."
+          visible={t.visible}
+          duration={3000}
+          type="error"
+        />
+      ));
+    },
+  });
 
   const getVideoDetails = async () => {
     if (!videoUrlInputRef.current) return;
@@ -52,15 +86,58 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedStage) return;
-    if (!youtubeData) return;
+    if (!youtubeData) {
+      toast.custom((t) => (
+        <Toast
+          message="Please fetch a video first."
+          visible={t.visible}
+          duration={3000}
+          type="error"
+        />
+      ));
+      return;
+    }
+    if (selectedOperators.length === 0) {
+      toast.custom((t) => (
+        <Toast
+          message="Please select at least one operator."
+          visible={t.visible}
+          duration={3000}
+          type="error"
+        />
+      ));
+      return;
+    }
+    if (selectedTags.length === 0) {
+      toast.custom((t) => (
+        <Toast
+          message="Please select at least one tag."
+          visible={t.visible}
+          duration={3000}
+          type="error"
+        />
+      ));
+      return;
+    }
+    if (!selectedStage) {
+      toast.custom((t) => (
+        <Toast
+          message="Please select a stage."
+          visible={t.visible}
+          duration={3000}
+          type="error"
+        />
+      ));
+      return;
+    }
     submitGuide({
       id: youtubeData.id,
       title: youtubeData.title,
-      stageId: selectedStage.stageCode ?? "",
+      stageId: selectedStage.id,
       operatorIds: selectedOperators.map((operator) => operator.id),
       tags: selectedTags.map((tag) => tag.id),
       uploadedById: youtubeData.channelId,
+      uploadedByName: youtubeData.channelTitle,
       thumbnailUrl: youtubeData.thumbnail,
     });
   };
@@ -214,7 +291,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           setSelectedStage={setSelectedStage}
           selectedStage={selectedStage}
         />
-        <Button className="my-5" type="submit">
+        <Button className="my-5" type="submit" isLoading={isSubmitting}>
           Submit
         </Button>
       </form>

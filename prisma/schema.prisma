@@ -108,10 +108,10 @@ enum Status {
 }
 
 model Guide {
-  id            String     @id
+  id            String     @id @default(cuid())
   title         String
-  stage         Stage      @relation(fields: [stageCode], references: [stageCode])
-  stageCode     String
+  stage         Stage      @relation(fields: [stageId], references: [id])
+  stageId       String
   operators     Operator[]
   tags          Tag[]
   submittedBy   User       @relation(fields: [submittedById], references: [id])
@@ -121,7 +121,7 @@ model Guide {
   uploadedBy    Creator    @relation(fields: [uploadedById], references: [id])
   uploadedById  String
 
-  @@index([stageCode])
+  @@index([stageId])
   @@index([submittedById])
   @@index([uploadedById])
 }
