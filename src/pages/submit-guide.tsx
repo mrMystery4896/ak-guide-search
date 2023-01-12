@@ -16,7 +16,7 @@ import TagCard from "../components/TagCard";
 import SelectTagDropdown from "../components/SelectTagDropdown";
 import { EventWithChildren } from "../utils/common-types";
 import SelectStageMenu from "../components/SelectStageMenu";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface SubmitGuideProps {
   operatorList: Operator[];
@@ -35,10 +35,6 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
-
-  const stageListData = trpc.stage.getStageforEvent.useQuery(
-    selectedEvent?.id ?? null
-  );
 
   const {
     data: youtubeData,
@@ -145,7 +141,8 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                     <Image
                       src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
                       alt={operator.name}
-                      fill
+                      width={64}
+                      height={64}
                     />
                     <div className="absolute h-full w-full bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100">
                       <p className="absolute bottom-0 w-full truncate px-1 text-center text-sm">
@@ -217,7 +214,9 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           setSelectedStage={setSelectedStage}
           selectedStage={selectedStage}
         />
-        <button type="submit">Submit</button>
+        <Button className="my-5" type="submit">
+          Submit
+        </Button>
       </form>
     </>
   );
