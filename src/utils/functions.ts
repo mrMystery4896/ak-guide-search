@@ -1,3 +1,5 @@
+import { EventWithChildren } from "./common-types";
+
 export const translateRarityToClassName = (rarity: number) => {
   switch (rarity) {
     case 1:
@@ -36,4 +38,38 @@ export const convertDateToUTCMinus7String = (
 ) => {
   if (!day || !month || !year) return null;
   return convertDateToUTCMinus7(new Date(`${month}/${day}/${year}`));
+};
+
+export const getEvent = async () => {
+  const eventList = await prisma?.event.findMany({
+    include: {
+      stages: {
+        orderBy: {
+          stageCode: "asc",
+        },
+      },
+      parentEvent: true,
+    },
+  });
+
+  // Transform eventList from flat list to tree
+  const map = new Map<string, EventWithChildren>();
+  const roots: EventWithChildren[] = [];
+
+  eventList?.forEach((event) => map.set(event.id, event));
+  eventList?.forEach((event) => {
+    if (event.parentEventId) {
+      const parent = map.get(event.parentEventId);
+      if (parent) {
+        if (!parent.childEvents) {
+          parent.childEvents = [];
+        }
+        parent.childEvents.push(event);
+      }
+    } else {
+      roots.push(event);
+    }
+  });
+
+  return roots;
 };

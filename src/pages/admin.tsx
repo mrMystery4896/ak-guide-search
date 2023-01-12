@@ -7,6 +7,7 @@ import { EventWithChildren } from "../utils/common-types";
 import { useMediaQuery } from "react-responsive";
 import React from "react";
 import { motion } from "framer-motion";
+import { getEvent } from "../utils/functions";
 
 interface AdminPageProps {
   operatorList: Operator[];
@@ -97,35 +98,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       },
     ],
   });
-  const eventList = await prisma?.event.findMany({
-    include: {
-      stages: {
-        orderBy: {
-          stageCode: "asc",
-        },
-      },
-      parentEvent: true,
-    },
-  });
 
-  // Transform eventList from flat list to tree
-  const map = new Map<string, EventWithChildren>();
-  const roots: EventWithChildren[] = [];
-
-  eventList?.forEach((event) => map.set(event.id, event));
-  eventList?.forEach((event) => {
-    if (event.parentEventId) {
-      const parent = map.get(event.parentEventId);
-      if (parent) {
-        if (!parent.childEvents) {
-          parent.childEvents = [];
-        }
-        parent.childEvents.push(event);
-      }
-    } else {
-      roots.push(event);
-    }
-  });
+  const eventList = await getEvent();
 
   if (session?.user?.role !== "ADMIN") {
     return {
@@ -139,7 +113,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   return {
     props: {
       operatorList,
-      eventList: JSON.parse(JSON.stringify(roots)),
+      eventList: JSON.parse(JSON.stringify(eventList)),
     },
   };
 };

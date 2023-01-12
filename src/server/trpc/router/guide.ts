@@ -27,7 +27,7 @@ export const guideRouter = router({
       z.object({
         id: z.string().length(11),
         title: z.string(),
-        stageCode: z.string().min(1),
+        stageId: z.string().min(1),
         operatorIds: z.array(z.string().min(1)),
         tags: z.array(z.string().cuid()),
         uploadedById: z.string(),
@@ -55,7 +55,7 @@ export const guideRouter = router({
           title: input.title,
           stage: {
             connect: {
-              stageCode: input.stageCode,
+              id: input.stageId,
             },
           },
           operators: {

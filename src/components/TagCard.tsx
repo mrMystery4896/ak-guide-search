@@ -13,9 +13,7 @@ const TagCard: React.FC<TagProps> = ({ tag, onClick }) => {
       }`}
       onClick={onClick}
     >
-      <p className="text-xs md:text-sm xl:text-base xl:font-semibold">
-        {tag.name}
-      </p>
+      <p className="text-sm xl:text-base xl:font-semibold">{tag.name}</p>
     </div>
   );
 };

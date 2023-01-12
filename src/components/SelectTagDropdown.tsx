@@ -36,21 +36,21 @@ const SelectTagDropdown: React.FC<SelectTagDropdownProps> = ({
   return (
     <>
       <Combobox value={selectedTagId} onChange={setSelectedTagId}>
-        <div className="relative w-44 md:w-64">
+        <div className="relative w-64 max-w-[80vw]">
           <Combobox.Button className="w-full">
             <Combobox.Input
               onChange={(e) => {
                 setQuery(e.target.value);
               }}
               className={twMerge(
-                "w-full rounded-md border-2 border-gray-300 bg-gray-300 py-2 px-3 text-sm placeholder:text-sm placeholder:text-gray-100 focus:border-primary focus:outline-none md:text-base md:placeholder:text-base ",
+                "w-full rounded-md border-2 border-gray-300 bg-gray-300 py-2 px-3 placeholder:text-gray-100 focus:border-primary focus:outline-none",
                 className
               )}
               placeholder="Search for a tag"
             />
           </Combobox.Button>
         </div>
-        <Combobox.Options className="absolute z-10 max-h-52 w-44 translate-y-1 overflow-auto rounded-md bg-gray-300 p-1 pr-2 md:w-64 md:p-2 md:pr-3">
+        <Combobox.Options className="absolute z-10 max-h-52 w-64 max-w-[80vw] translate-y-1 overflow-auto rounded-md bg-gray-300 p-2 drop-shadow-lg">
           {filteredTags.length !== 0 ? (
             filteredTags.map((tag) => {
               return (
@@ -63,7 +63,7 @@ const SelectTagDropdown: React.FC<SelectTagDropdownProps> = ({
                     <li
                       className={`${
                         active ? "bg-primary" : ""
-                      } rounded-md p-1 text-sm md:p-2 md:text-base`}
+                      } flex h-14 cursor-pointer items-center rounded-md p-2`}
                     >
                       {tag.name}
                     </li>
@@ -73,9 +73,7 @@ const SelectTagDropdown: React.FC<SelectTagDropdownProps> = ({
             })
           ) : (
             <Combobox.Option disabled value="">
-              <p className="p-1 text-sm text-gray-100 md:p-2 md:text-base">
-                No tags found
-              </p>
+              <p className="p-2 text-gray-100">No tags found</p>
             </Combobox.Option>
           )}
         </Combobox.Options>

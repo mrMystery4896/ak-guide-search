@@ -41,19 +41,19 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
   return (
     <>
       <Combobox value={selectedOperatorId} onChange={setSelectedOperatorId}>
-        <div className="relative w-44 md:w-64">
+        <div className="relative w-64 max-w-[80vw]">
           <Combobox.Input
             onChange={(e) => {
               setQuery(e.target.value);
             }}
             className={twMerge(
-              "w-full rounded-md border-2 border-gray-300 bg-gray-300 py-2 px-3 text-sm placeholder:text-sm placeholder:text-gray-100 focus:border-primary focus:outline-none md:text-base md:placeholder:text-base ",
+              "w-full rounded-md border-2 border-gray-300 bg-gray-300 py-2 px-3 placeholder:text-gray-100 focus:border-primary focus:outline-none",
               className
             )}
             placeholder="Search for an operator"
           />
         </div>
-        <Combobox.Options className="absolute z-10 max-h-52 w-44 translate-y-1 overflow-auto rounded-md bg-gray-300 p-1 pr-2 md:w-64 md:p-2 md:pr-3">
+        <Combobox.Options className="absolute z-10 max-h-52 w-64 max-w-[80vw] translate-y-1 overflow-auto rounded-md bg-gray-300 p-2 drop-shadow-lg">
           {filteredOperators.length !== 0 && query !== "" ? (
             filteredOperators.map((operator) => {
               return (
@@ -66,10 +66,10 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
                     <li
                       className={`${
                         active ? "bg-primary" : ""
-                      } flex h-10 cursor-pointer items-center gap-2 rounded-md p-1 md:h-14 md:gap-4 md:p-2`}
+                      } flex h-14 cursor-pointer items-center gap-4 rounded-md p-2`}
                     >
                       <div
-                        className={`relative h-6 w-6 overflow-hidden rounded-full md:h-10 md:w-10 ${translateRarityToClassName(
+                        className={`relative min-h-[40px] min-w-[40px] overflow-hidden rounded-full ${translateRarityToClassName(
                           operator.rarity
                         )}`}
                       >
@@ -77,9 +77,10 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
                           src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
                           alt={operator.id}
                           fill
+                          sizes="100%"
                         />
                       </div>
-                      <span>{operator.name}</span>
+                      <span className="truncate">{operator.name}</span>
                     </li>
                   )}
                 </Combobox.Option>
@@ -87,7 +88,7 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
             })
           ) : (
             <Combobox.Option disabled value="">
-              <p className="text-gray-100">No operators found</p>
+              <p className="p-2 text-gray-100">No operators found</p>
             </Combobox.Option>
           )}
         </Combobox.Options>

@@ -11,14 +11,17 @@ import { HiArrowsUpDown } from "react-icons/hi2";
 import Tooltip from "../components/Tooltip";
 import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
 import { prisma } from "../server/db/client";
-import { translateRarityToClassName } from "../utils/functions";
+import { getEvent, translateRarityToClassName } from "../utils/functions";
 import TagCard from "../components/TagCard";
 import SelectTagDropdown from "../components/SelectTagDropdown";
+import { EventWithChildren } from "../utils/common-types";
+import SelectStageMenu from "../components/SelectStageMenu";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface SubmitGuideProps {
   operatorList: Operator[];
   tagList: Tag[];
-  eventList: Event[];
+  eventList: EventWithChildren[];
 }
 
 const SubmitGuide: NextPage<SubmitGuideProps> = ({
@@ -58,7 +61,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     submitGuide({
       id: youtubeData.id,
       title: youtubeData.title,
-      stageCode: selectedStage.stageCode,
+      stageId: selectedStage.stageCode ?? "",
       operatorIds: selectedOperators.map((operator) => operator.id),
       tags: selectedTags.map((tag) => tag.id),
       uploadedById: youtubeData.channelId,
@@ -188,62 +191,32 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           tags={tagList.filter((tag) => !selectedTags.includes(tag))}
           className="mt-2"
         />
-        <h2 className="mt-5 text-xl font-bold">Select An Event</h2>
-        <select
-          // value={selectedEvent?.id ?? ""}
-          onChange={(e) => {
-            const selectedEventObject = eventList.find(
-              (event) => event.id === e.target.value
-            );
-            setSelectedEvent(selectedEventObject ?? null);
-          }}
-          defaultValue={""}
-          className="w-64"
-        >
-          <option value="" disabled>
-            Select Event
-          </option>
-          {eventList.map((event) => {
-            return (
-              <option key={event.id} value={event.id}>
-                {event.name}
-              </option>
-            );
-          })}
-        </select>
-        <br />
-        <select
-          defaultValue={selectedEvent ? "" : "no-event-selected"}
-          disabled={!selectedEvent}
-          // value={selectedStage?.stageCode ?? ""}
-          onChange={(e) => {
-            const selectedStageObject = stageListData.data?.find(
-              (stage) => stage.stageCode === e.target.value
-            );
-            setSelectedStage(selectedStageObject ?? null);
+        <h2 className="mt-5 text-xl font-bold">Select a Stage</h2>
+        <motion.div
+          key={selectedStage?.id ?? "none"}
+          className="my-2"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            transition: {
+              ease: "easeOut",
+              duration: 0.3,
+            },
           }}
         >
-          {selectedEvent ? (
-            <option value="" disabled>
-              Select a stage
-            </option>
-          ) : (
-            <option value="no-event-selected" disabled>
-              Please select an event first
-            </option>
+          {selectedStage?.stageCode && (
+            <>
+              <b>{selectedStage.stageCode}</b> -{" "}
+            </>
           )}
-          {stageListData.data ? (
-            stageListData.data.map((stage) => {
-              return (
-                <option key={stage.stageCode} value={stage.stageCode}>
-                  {stage.stageCode}
-                </option>
-              );
-            })
-          ) : (
-            <option disabled>Loading...</option>
-          )}
-        </select>
+          {selectedStage?.stageName ?? "Please select a stage"}
+        </motion.div>
+        <SelectStageMenu
+          eventList={eventList}
+          setSelectedStage={setSelectedStage}
+          selectedStage={selectedStage}
+        />
         <button type="submit">Submit</button>
       </form>
     </>
@@ -269,11 +242,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       name: "asc",
     },
   });
-  const eventList = await prisma.event.findMany({
-    orderBy: {
-      startDate: "desc",
-    },
-  });
+  const eventList = await getEvent();
 
   if (!session) {
     return {
