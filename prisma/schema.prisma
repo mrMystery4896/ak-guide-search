@@ -72,10 +72,10 @@ model VerificationToken {
 }
 
 model Operator {
-  id     String  @id
-  name   String
-  rarity Int
-  guides Guide[]
+  id            String          @id
+  name          String
+  rarity        Int
+  guideOperator GuideOperator[]
 }
 
 model Stage {
@@ -108,22 +108,40 @@ enum Status {
 }
 
 model Guide {
-  id            String     @id @default(cuid())
+  id            String          @id @default(cuid())
   title         String
-  stage         Stage      @relation(fields: [stageId], references: [id])
+  stage         Stage           @relation(fields: [stageId], references: [id])
   stageId       String
-  operators     Operator[]
+  guideOperator GuideOperator[]
   tags          Tag[]
-  submittedBy   User       @relation(fields: [submittedById], references: [id])
+  submittedBy   User            @relation(fields: [submittedById], references: [id])
   submittedById String
   status        Status
   submittedAt   DateTime
-  uploadedBy    Creator    @relation(fields: [uploadedById], references: [id])
+  uploadedBy    Creator         @relation(fields: [uploadedById], references: [id])
   uploadedById  String
 
   @@index([stageId])
   @@index([submittedById])
   @@index([uploadedById])
+}
+
+model GuideOperator {
+  operator    Operator @relation(fields: [operatorId], references: [id])
+  operatorId  String
+  guide       Guide    @relation(fields: [guideId], references: [id])
+  guideId     String
+  elite       Int?     @default(0)
+  level       Int?     @default(1)
+  skill       Int?     @default(1)
+  skillLevel  Int?     @default(1)
+  mastery     Int?     @default(0)
+  hasModule   Boolean? @default(false)
+  moduleLevel Int?
+
+  @@id([operatorId, guideId])
+  @@index([guideId])
+  @@index([operatorId])
 }
 
 model Event {

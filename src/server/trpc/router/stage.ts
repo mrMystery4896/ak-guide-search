@@ -82,7 +82,7 @@ export const stageRouter = router({
       } catch (e) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Something went wrong",
+          message: "Something went wrong. Please try again later.",
         });
       }
     }),
@@ -91,7 +91,10 @@ export const stageRouter = router({
       z.object({
         stageId: z.string().cuid({ message: "Invalid stage." }),
         stageName: z.string().min(1, { message: "Stage name is required." }),
-        stageCode: z.string().min(1).nullable(),
+        stageCode: z
+          .string()
+          .min(1, { message: "Stage name must be at least 1 character." })
+          .nullable(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -112,7 +115,7 @@ export const stageRouter = router({
         } catch (error) {
           throw new TRPCError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Something went wrong",
+            message: "Something went wrong. Please try again later.",
           });
         }
 
@@ -146,7 +149,7 @@ export const stageRouter = router({
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Something went wrong",
+          message: "Something went wrong. Please try again later.",
         });
       }
     }),

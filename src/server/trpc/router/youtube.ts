@@ -15,8 +15,8 @@ export const youtubeRouter = router({
           message: "Invalid URL. Please enter a link from YouTube.",
         })
     )
-    .mutation(async ({ ctx, input }) => {
-      const urlObj:URL = new URL(input);
+    .mutation(async ({ input }) => {
+      const urlObj: URL = new URL(input);
       const videoId = urlObj.searchParams.get("v");
       if (!videoId) {
         throw new TRPCError({

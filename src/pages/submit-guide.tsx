@@ -1,4 +1,4 @@
-import { Event, Operator, Stage, Tag } from "@prisma/client";
+import { Operator, Stage, Tag } from "@prisma/client";
 import { GetServerSideProps, type NextPage } from "next";
 import Image from "next/image";
 import { useRef, useState } from "react";
@@ -70,7 +70,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     onError: (error) => {
       toast.custom((t) => (
         <Toast
-          message="Something went wrong. Please try again later."
+          message={error.message}
           visible={t.visible}
           duration={3000}
           type="error"
@@ -134,7 +134,16 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
       id: youtubeData.id,
       title: youtubeData.title,
       stageId: selectedStage.id,
-      operatorIds: selectedOperators.map((operator) => operator.id),
+      operators: selectedOperators.map((operator) => ({
+        id: operator.id,
+        elite: 0,
+        level: 1,
+        skill: 1,
+        skillLevel: 1,
+        mastery: 0,
+        hasModule: false,
+        moduleLevel: 1,
+      })),
       tags: selectedTags.map((tag) => tag.id),
       uploadedById: youtubeData.channelId,
       uploadedByName: youtubeData.channelTitle,
@@ -145,9 +154,6 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
   return (
     <>
       <h1 className="text-2xl font-bold">Submit Guide</h1>
-      {submitGuideError ? (
-        <p className="text-red-500">{submitGuideError.message}</p>
-      ) : null}
       <h2 className="mt-2 flex items-center text-xl font-bold">
         YouTube Link
         <Tooltip content="test" />
@@ -221,7 +227,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                       width={64}
                       height={64}
                     />
-                    <div className="absolute h-full w-full bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100">
+                    <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100">
                       <p className="absolute bottom-0 w-full truncate px-1 text-center text-sm">
                         {operator.name}
                       </p>
@@ -231,6 +237,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
               })}
           </div>
         ) : null}
+        {/* TODO: Add input for skill, level, and modules.  */}
         <SelectOperatorDropdown
           operators={operatorList.filter(
             (operator) => !selectedOperators.includes(operator)

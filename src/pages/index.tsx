@@ -1,17 +1,21 @@
 import { GetServerSideProps, type NextPage } from "next";
 import { motion, Variants } from "framer-motion";
 import GuideCard from "../components/GuideCard";
-import { Creator, Guide, Operator, Tag } from "@prisma/client";
+import { Creator, Guide, GuideOperator, Operator, Tag } from "@prisma/client";
 import { prisma } from "../server/db/client";
 
 interface HomeProps {
-  recentGuides:
-    | (Guide & {
-        operators: Operator[];
-        uploadedBy: Creator;
-        tags: Tag[];
-      })[]
-    | undefined;
+  recentGuides: (Guide & {
+    guideOperator: (GuideOperator & {
+      operator: {
+        id: string;
+        name: string;
+        rarity: number;
+      };
+    })[];
+    tags: Tag[];
+    uploadedBy: Creator;
+  })[];
 }
 
 const guideCards: Variants = {
@@ -61,16 +65,26 @@ export default Home;
 
 export const getServerSideProps: GetServerSideProps = async () => {
   const data = await prisma.guide.findMany({
+    include: {
+      guideOperator: {
+        include: {
+          operator: {
+            select: {
+              name: true,
+              rarity: true,
+              id: true,
+            },
+          },
+        },
+      },
+      uploadedBy: true,
+      tags: true,
+    },
     where: {
       status: "APPROVED",
     },
     orderBy: {
       submittedAt: "desc",
-    },
-    include: {
-      operators: true,
-      uploadedBy: true,
-      tags: true,
     },
     take: 3,
   });

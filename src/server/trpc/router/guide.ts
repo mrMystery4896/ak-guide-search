@@ -7,17 +7,38 @@ export const guideRouter = router({
   getRecentGuides: publicProcedure
     .input(z.number().min(1))
     .query(({ ctx, input }) => {
-      return ctx.prisma.guide.findMany({
+      // return ctx.prisma.guide.findMany({
+      //   where: {
+      //     status: "APPROVED",
+      //   },
+      //   orderBy: {
+      //     submittedAt: "desc",
+      //   },
+      //   include: {
+      //     operators: true,
+      //     uploadedBy: true,
+      //     tags: true,
+      //   },
+      //   take: input,
+      // });
+      return ctx.prisma.guideOperator.findMany({
+        include: {
+          guide: {
+            include: {
+              tags: true,
+            },
+          },
+          operator: true,
+        },
         where: {
-          status: "APPROVED",
+          guide: {
+            status: "APPROVED",
+          },
         },
         orderBy: {
-          submittedAt: "desc",
-        },
-        include: {
-          operators: true,
-          uploadedBy: true,
-          tags: true,
+          guide: {
+            submittedAt: "desc",
+          },
         },
         take: input,
       });
@@ -28,7 +49,19 @@ export const guideRouter = router({
         id: z.string().length(11),
         title: z.string(),
         stageId: z.string().min(1),
-        operatorIds: z.array(z.string().min(1)),
+        operators: z.array(
+          z.object({
+            id: z.string().min(1),
+            elite: z.number().min(0).max(2).nullable(),
+            level: z.number().min(1).max(90).nullable(),
+            skill: z.number().min(1).max(3).nullable(),
+            skillLevel: z.number().min(1).max(7).nullable(),
+            mastery: z.number().min(0).max(3).nullable(),
+            hasModule: z.boolean().default(false),
+            moduleLevel: z.number().min(1).max(3).nullable(),
+          })
+        ),
+        // operatorIds: z.array(z.string().min(1)),
         tags: z.array(z.string().cuid()),
         uploadedById: z.string().min(1),
         uploadedByName: z.string().min(1),
@@ -51,7 +84,7 @@ export const guideRouter = router({
       }
 
       try {
-        return ctx.prisma.guide.create({
+        return await ctx.prisma.guide.create({
           data: {
             id: input.id,
             title: input.title,
@@ -60,8 +93,23 @@ export const guideRouter = router({
                 id: input.stageId,
               },
             },
-            operators: {
-              connect: input.operatorIds.map((id) => ({ id })),
+            guideOperator: {
+              create: input.operators.map((operator) => {
+                return {
+                  operator: {
+                    connect: {
+                      id: operator.id,
+                    },
+                  },
+                  elite: operator.elite,
+                  level: operator.level,
+                  skill: operator.skill,
+                  skillLevel: operator.skillLevel,
+                  mastery: operator.mastery,
+                  hasModule: operator.hasModule,
+                  moduleLevel: operator.moduleLevel,
+                };
+              }),
             },
             tags: {
               connect: input.tags.map((id) => ({ id })),

@@ -1,4 +1,4 @@
-import { Creator, Guide, Operator, Tag } from "@prisma/client";
+import { Creator, Guide, GuideOperator, Operator, Tag } from "@prisma/client";
 import Image from "next/image";
 import { env } from "../env/client.mjs";
 import TagCard from "./TagCard";
@@ -8,7 +8,13 @@ import { useMediaQuery } from "react-responsive";
 
 interface GuideCardProps {
   guide: Guide & {
-    operators: Operator[];
+    guideOperator: (GuideOperator & {
+      operator: {
+        id: string;
+        name: string;
+        rarity: number;
+      };
+    })[];
     tags: Tag[];
     uploadedBy: Creator;
   };
@@ -26,8 +32,6 @@ const guideCard: Variants = {
 };
 
 const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
-  const isXlScreen = useMediaQuery({ query: "(min-width: 1280px)" });
-
   return (
     <motion.div
       variants={guideCard}
@@ -60,7 +64,8 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
           })}
         </div>
         <ul className="flex max-h-10 gap-2 md:gap-3">
-          {guide.operators
+          {guide.guideOperator
+            .map((guideOperator) => guideOperator.operator)
             .sort((a, b) => b.rarity - a.rarity)
             .map((operator) => {
               return (
@@ -76,8 +81,6 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
                     alt={operator.id}
                     fill
                     sizes="100%"
-                    // width={isXlScreen ? 48 : 40}
-                    // height={isXlScreen ? 48 : 40}
                     style={{ objectFit: "contain" }}
                   />
                 </li>
