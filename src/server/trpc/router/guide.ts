@@ -57,7 +57,7 @@ export const guideRouter = router({
             skill: z.number().min(1).max(3).nullable(),
             skillLevel: z.number().min(1).max(7).nullable(),
             mastery: z.number().min(0).max(3).nullable(),
-            hasModule: z.boolean().default(false),
+            hasModule: z.boolean().nullable(),
             moduleLevel: z.number().min(1).max(3).nullable(),
           })
         ),

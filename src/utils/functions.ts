@@ -73,3 +73,71 @@ export const getEvent = async () => {
 
   return roots;
 };
+
+export const getEliteBasedOnRarity = (rarity: number) => {
+  switch (rarity) {
+    case 6:
+    case 5:
+    case 4:
+      return [0, 1, 2];
+    case 3:
+      return [0, 1];
+    case 2:
+    case 1:
+      return [0];
+    default:
+      return [];
+  }
+};
+
+export const calculateMaxLevel = (rarity: number, elite: number) => {
+  switch (rarity) {
+    case 1:
+    case 2:
+      return 30;
+    case 3:
+      return elite === 0 ? 30 : 40;
+    case 4:
+      return elite === 0 ? 45 : elite === 1 ? 60 : 70;
+    case 5:
+      return elite === 0 ? 50 : elite === 1 ? 70 : 80;
+    case 6:
+      return elite === 0 ? 50 : elite === 1 ? 80 : 90;
+    default:
+      return null;
+  }
+};
+
+export const getSkill = (rarity: number, elite: number) => {
+  switch (rarity) {
+    case 1:
+    case 2:
+      return [];
+    case 3:
+      return [1];
+    case 4:
+    case 5:
+      return elite === 0 ? [1] : [1, 2];
+    case 6:
+      return elite === 0 ? [1] : elite === 1 ? [1, 2] : [1, 2, 3];
+    default:
+      return [];
+  }
+};
+
+export const getSkillLevel = (elite: number) => {
+  switch (elite) {
+    case 0:
+      return [1, 2, 3, 4];
+    case 1:
+    case 2:
+      return [1, 2, 3, 4, 5, 6, 7];
+    default:
+      return [];
+  }
+};
+
+export const getMastery = (elite: number) => {
+  if (elite === 2) return [0, 1, 2, 3];
+  return [];
+};

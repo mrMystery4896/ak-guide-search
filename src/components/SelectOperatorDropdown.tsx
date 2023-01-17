@@ -7,10 +7,12 @@ import Image from "next/image";
 import React from "react";
 import { translateRarityToClassName } from "../utils/functions";
 import { AnimatePresence, motion } from "framer-motion";
+import { BiX } from "react-icons/bi";
 
 interface SelectOperatorDropdownProps {
   operators: Operator[];
-  setSelectedOperators: React.Dispatch<React.SetStateAction<Operator[]>>;
+  activeOperator: Operator | null;
+  handleSelectOperator: (operator: Operator | null) => void;
   className?: string;
 }
 
@@ -19,6 +21,7 @@ interface DropdownOptionsProps {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   operators: Operator[];
+  activeOperator: Operator | null;
 }
 
 const DropdownOptions: React.FC<DropdownOptionsProps> = ({
@@ -26,6 +29,7 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
   query,
   setQuery,
   operators,
+  activeOperator,
 }) => {
   const [filteredLength, setFilteredLength] = useState(10);
 
@@ -33,6 +37,13 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
     if (!open) {
       setFilteredLength(10);
       setQuery("");
+    } else {
+      const index = operators.findIndex(
+        (operator) => operator.id === activeOperator?.id
+      );
+      if (index > 0) {
+        setFilteredLength(index + 10);
+      }
     }
   }, [open]);
 
@@ -54,7 +65,7 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
           exit={{ opacity: 0, y: 5 }}
           transition={{ duration: 0.2 }}
           static
-          className="absolute z-10 mt-1 max-h-52 w-64 max-w-[80vw] translate-y-1 overflow-auto rounded-md bg-gray-300 p-2 drop-shadow-lg"
+          className="absolute z-10 mt-1 max-h-52 w-64 translate-y-1 overflow-auto rounded-md bg-gray-300 p-2 drop-shadow-lg"
         >
           {operators.filter((operator) => {
             return operator.name.toLowerCase().startsWith(query.toLowerCase());
@@ -73,22 +84,22 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
                     key={operator.id}
                     value={operator.id}
                   >
-                    {({ active }) => (
+                    {({ active, selected }) => (
                       <li
                         className={`${
-                          active ? "bg-primary" : ""
-                        } flex h-14 cursor-pointer items-center gap-4 rounded-md p-2`}
+                          active || selected ? "bg-primary" : ""
+                        } flex h-12 cursor-pointer items-center gap-4 rounded-md p-2`}
                       >
                         <div
-                          className={`relative min-h-[40px] min-w-[40px] overflow-hidden rounded-full ${translateRarityToClassName(
+                          className={`relative min-h-[32px] min-w-[32px] overflow-hidden rounded-full ${translateRarityToClassName(
                             operator.rarity
                           )}`}
                         >
                           <Image
                             src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
                             alt={operator.id}
-                            width={40}
-                            height={40}
+                            width={32}
+                            height={32}
                           />
                         </div>
                         <span className="truncate">{operator.name}</span>
@@ -112,7 +123,8 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
 
 const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
   operators,
-  setSelectedOperators,
+  handleSelectOperator,
+  activeOperator,
   className,
 }) => {
   const [selectedOperatorId, setSelectedOperatorId] = useState("");
@@ -123,11 +135,8 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
       const operatorToAdd = operators.find(
         (operator) => operator.id === selectedOperatorId
       );
-      if (!operatorToAdd) return;
-      setSelectedOperators((prev) => [...prev, operatorToAdd]);
-      setQuery("");
-      setSelectedOperatorId("");
-    }
+      handleSelectOperator(operatorToAdd ?? null);
+    } else handleSelectOperator(null);
   }, [selectedOperatorId]);
 
   return (
@@ -135,29 +144,59 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
       <Combobox value={selectedOperatorId} onChange={setSelectedOperatorId}>
         {({ open }) => {
           return (
-            <>
-              <div className="relative w-64 max-w-[80vw]">
+            <div className="relative">
+              <div className="relative w-full md:w-64">
+                {activeOperator && (
+                  <div
+                    className={`absolute top-1/2 left-2 min-h-[32px] min-w-[32px] -translate-y-1/2 overflow-hidden rounded-full ${translateRarityToClassName(
+                      activeOperator.rarity
+                    )}`}
+                  >
+                    <Image
+                      src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${activeOperator.id}.png`}
+                      alt={activeOperator.id}
+                      width={32}
+                      height={32}
+                    />
+                  </div>
+                )}
                 <Combobox.Button className="w-full">
                   <Combobox.Input
                     onChange={(e) => {
                       setQuery(e.target.value);
                     }}
                     className={twMerge(
-                      "w-full rounded-md border-2 border-gray-300 bg-gray-300 py-2 px-3 placeholder:text-gray-100 focus:border-primary focus:outline-none",
+                      `w-full rounded-md border-2 border-gray-300 bg-gray-300 py-2 px-3 ${
+                        activeOperator ? "pl-12" : "pl-3"
+                      } placeholder:text-gray-100 focus:border-primary focus:outline-none`,
                       className
                     )}
-                    value={query}
+                    displayValue={() =>
+                      activeOperator ? activeOperator.name : ""
+                    }
                     placeholder="Search for an operator"
                   />
                 </Combobox.Button>
+                <button
+                  type="button"
+                  className={`absolute right-0 top-0 h-full ${
+                    activeOperator ? "" : "hidden"
+                  }`}
+                  onClick={() => {
+                    setSelectedOperatorId("");
+                  }}
+                >
+                  <BiX className="mr-1 h-6 w-6" />
+                </button>
               </div>
               <DropdownOptions
                 open={open}
                 query={query}
                 setQuery={setQuery}
                 operators={operators}
+                activeOperator={activeOperator}
               />
-            </>
+            </div>
           );
         }}
       </Combobox>

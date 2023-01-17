@@ -242,9 +242,6 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           id="startDateDay"
                           inputDivClassName="w-1/5"
                           type="number"
-                          onWheel={(e) => {
-                            e.currentTarget.blur();
-                          }}
                           className={
                             errors.startDate
                               ? "border-red focus:border-red"
@@ -256,9 +253,6 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           placeholder="MM"
                           inputDivClassName="w-1/5"
                           type="number"
-                          onWheel={(e) => {
-                            e.currentTarget.blur();
-                          }}
                           className={
                             errors.startDate
                               ? "border-red focus:border-red"
@@ -270,9 +264,6 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           placeholder="YYYY"
                           inputDivClassName="w-2/5"
                           type="number"
-                          onWheel={(e) => {
-                            e.currentTarget.blur();
-                          }}
                           className={
                             errors.startDate
                               ? "border-red focus:border-red"
@@ -300,9 +291,6 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           id="endDateDay"
                           inputDivClassName="w-1/5"
                           type="number"
-                          onWheel={(e) => {
-                            e.currentTarget.blur();
-                          }}
                           className={
                             errors.endDate ? "border-red focus:border-red" : ""
                           }
@@ -312,9 +300,6 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           placeholder="MM"
                           inputDivClassName="w-1/5"
                           type="number"
-                          onWheel={(e) => {
-                            e.currentTarget.blur();
-                          }}
                           className={
                             errors.endDate ? "border-red focus:border-red" : ""
                           }
@@ -324,9 +309,6 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
                           placeholder="YYYY"
                           inputDivClassName="w-2/5"
                           type="number"
-                          onWheel={(e) => {
-                            e.currentTarget.blur();
-                          }}
                           className={
                             errors.endDate ? "border-red focus:border-red" : ""
                           }

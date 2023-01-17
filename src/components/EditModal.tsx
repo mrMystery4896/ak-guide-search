@@ -209,9 +209,6 @@ const EditEventForm: React.FC<{
               id="startDateDay"
               inputDivClassName="w-1/5"
               type="number"
-              onWheel={(e) => {
-                e.currentTarget.blur();
-              }}
               defaultValue={
                 convertDateToUTCMinus7(event.startDate)?.getDate() ?? ""
               }
@@ -222,9 +219,6 @@ const EditEventForm: React.FC<{
               placeholder="MM"
               inputDivClassName="w-1/5"
               type="number"
-              onWheel={(e) => {
-                e.currentTarget.blur();
-              }}
               defaultValue={
                 event.startDate
                   ? (convertDateToUTCMinus7(event.startDate)?.getMonth() ?? 0) +
@@ -238,9 +232,6 @@ const EditEventForm: React.FC<{
               placeholder="YYYY"
               inputDivClassName="w-2/5"
               type="number"
-              onWheel={(e) => {
-                e.currentTarget.blur();
-              }}
               defaultValue={
                 convertDateToUTCMinus7(event.startDate)?.getFullYear() ?? ""
               }
@@ -264,9 +255,6 @@ const EditEventForm: React.FC<{
               id="endDateDay"
               inputDivClassName="w-1/5"
               type="number"
-              onWheel={(e) => {
-                e.currentTarget.blur();
-              }}
               defaultValue={
                 convertDateToUTCMinus7(event.endDate)?.getDate() ?? ""
               }
@@ -277,9 +265,6 @@ const EditEventForm: React.FC<{
               placeholder="MM"
               inputDivClassName="w-1/5"
               type="number"
-              onWheel={(e) => {
-                e.currentTarget.blur();
-              }}
               defaultValue={
                 event.endDate
                   ? (convertDateToUTCMinus7(event.endDate)?.getMonth() ?? 0) + 1
@@ -292,9 +277,6 @@ const EditEventForm: React.FC<{
               placeholder="YYYY"
               inputDivClassName="w-2/5"
               type="number"
-              onWheel={(e) => {
-                e.currentTarget.blur();
-              }}
               defaultValue={
                 convertDateToUTCMinus7(event.endDate)?.getFullYear() ?? ""
               }

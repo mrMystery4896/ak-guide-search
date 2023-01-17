@@ -8,7 +8,18 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ errorMessage, inputDivClassName, label, className, ...props }, ref) => {
+  (
+    {
+      errorMessage,
+      inputDivClassName,
+      label,
+      className,
+      type,
+      disabled,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <div
         className={twMerge(
@@ -26,12 +37,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           className={twMerge(
-            `rounded-md border-2 border-gray-300 bg-gray-300 px-3 py-2 text-sm placeholder:text-sm placeholder:text-gray-100 focus:outline-none md:py-2 md:text-base placeholder:md:text-base ${
+            `rounded-md border-2 ${
+              disabled
+                ? "border-gray-300/50 bg-gray-300/50 text-white/50 placeholder:text-gray-100/50"
+                : "border-gray-300 bg-gray-300 text-white placeholder:text-gray-100"
+            } px-3 py-2 text-sm placeholder:text-sm focus:outline-none md:py-2 md:text-base placeholder:md:text-base ${
               errorMessage ? "border-red" : "focus:border-primary"
             }`,
             className
           )}
           ref={ref}
+          type={type}
+          onWheel={
+            type === "number" ? (e) => e.currentTarget.blur() : undefined
+          }
+          disabled={disabled}
           {...props}
         />
         <span

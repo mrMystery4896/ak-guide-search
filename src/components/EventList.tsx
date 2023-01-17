@@ -291,7 +291,7 @@ const EventList: React.FC<EventListProps> = ({
                     <AnimatePresence>
                       {open && (
                         <Disclosure.Panel
-                          className={className ?? "" + " mr-8"}
+                          className={className ?? "" + " mr-8 w-auto"}
                           as={motion.div}
                           initial={{ height: 0, overflowY: "hidden" }}
                           animate={{ height: "auto", overflowY: "visible" }}
@@ -310,10 +310,10 @@ const EventList: React.FC<EventListProps> = ({
                               {event.stages.map((stage, i) => (
                                 <div
                                   key={stage.id}
-                                  className="relative mt-2 flex w-full max-w-[calc(100%-80px)] gap-2"
+                                  className="relative mt-2 flex w-full max-w-[calc(100%-80px)] justify-between gap-2"
                                   style={{ zIndex: `-${i}` }}
                                 >
-                                  <div className="w-full max-w-[calc(100%-80px)] rounded-md bg-gray-300 p-2 px-4 text-center">
+                                  <div className="min-w-full rounded-md bg-gray-300 p-2 px-4 text-center">
                                     <p className="truncate">
                                       {stage.stageCode && (
                                         <span>
@@ -433,17 +433,6 @@ const EventList: React.FC<EventListProps> = ({
                                   </Menu>
                                 </div>
                               ))}
-                              {/* <Button
-                                className="-z-50 mt-2 w-[calc(100%-80px)] truncate py-2"
-                                onClick={() => {
-                                  setAddStageModalState({
-                                    open: true,
-                                    event: event,
-                                  });
-                                }}
-                              >
-                                Add Stage
-                              </Button> */}
                             </>
                           )}
                         </Disclosure.Panel>

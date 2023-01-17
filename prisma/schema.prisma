@@ -131,12 +131,12 @@ model GuideOperator {
   operatorId  String
   guide       Guide    @relation(fields: [guideId], references: [id])
   guideId     String
-  elite       Int?     @default(0)
-  level       Int?     @default(1)
-  skill       Int?     @default(1)
-  skillLevel  Int?     @default(1)
-  mastery     Int?     @default(0)
-  hasModule   Boolean? @default(false)
+  elite       Int?
+  level       Int?
+  skill       Int?
+  skillLevel  Int?
+  mastery     Int?
+  hasModule   Boolean?
   moduleLevel Int?
 
   @@id([operatorId, guideId])

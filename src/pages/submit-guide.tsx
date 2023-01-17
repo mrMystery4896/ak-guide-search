@@ -1,26 +1,36 @@
 import { Operator, Stage, Tag } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { GetServerSideProps, type NextPage } from "next";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useRouter } from "next/router";
+import React, { useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { HiArrowsUpDown } from "react-icons/hi2";
 import Button from "../components/Button";
+import Dropdown from "../components/Dropdown";
 import Input from "../components/Input";
+import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
+import SelectStageMenu from "../components/SelectStageMenu";
+import SelectTagDropdown from "../components/SelectTagDropdown";
+import TagCard from "../components/TagCard";
+import Toast from "../components/Toast";
+import Tooltip from "../components/Tooltip";
 import { env } from "../env/client.mjs";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
-import { trpc } from "../utils/trpc";
-import { HiArrowsUpDown } from "react-icons/hi2";
-import Tooltip from "../components/Tooltip";
-import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
 import { prisma } from "../server/db/client";
-import { getEvent, translateRarityToClassName } from "../utils/functions";
-import TagCard from "../components/TagCard";
-import SelectTagDropdown from "../components/SelectTagDropdown";
-import { EventWithChildren } from "../utils/common-types";
-import SelectStageMenu from "../components/SelectStageMenu";
-import { motion } from "framer-motion";
-import toast from "react-hot-toast";
-import Toast from "../components/Toast";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import { EventWithChildren, OperatorWithDetails } from "../utils/common-types";
+import {
+  getEliteBasedOnRarity,
+  calculateMaxLevel,
+  getEvent,
+  getSkill,
+  translateRarityToClassName,
+  getSkillLevel,
+  getMastery,
+} from "../utils/functions";
+import { trpc } from "../utils/trpc";
 
 interface SubmitGuideProps {
   operatorList: Operator[];
@@ -35,11 +45,153 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
 }) => {
   const videoUrlInputRef = useRef<HTMLInputElement>(null);
 
-  const [selectedOperators, setSelectedOperators] = useState<Operator[]>([]);
+  const [selectedOperators, setSelectedOperators] = useState<
+    OperatorWithDetails[]
+  >([]);
+  const [activeOperator, setActiveOperator] = useState<Operator | null>(null);
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
   const [selectedStage, setSelectedStage] = useState<Stage | null>(null);
+  const [activeOperatorDetails, setActiveOperatorDetails] = useState<
+    Omit<OperatorWithDetails, keyof Operator>
+  >({
+    elite: null,
+    level: null,
+    skill: null,
+    skillLevel: null,
+    mastery: null,
+    hasModule: null,
+    moduleLevel: null,
+  });
+  const [lastAddedOperator, setLastAddedOperator] = useState({
+    ...activeOperator,
+    ...activeOperatorDetails,
+  });
   const session = useSession();
   const router = useRouter();
+  const { data: operatorElite } = useQuery(
+    ["calculate-operator-elite", activeOperator],
+    {
+      queryFn: () => {
+        if (!activeOperator) return null;
+        const eliteArray = getEliteBasedOnRarity(activeOperator.rarity);
+        if (
+          activeOperatorDetails.elite === null ||
+          !eliteArray.includes(activeOperatorDetails.elite)
+        ) {
+          setActiveOperatorDetails((prev) => ({
+            ...prev,
+            elite: eliteArray[eliteArray.length - 1] ?? null,
+          }));
+        }
+        return eliteArray;
+      },
+    }
+  );
+  const { data: operatorMaxLevel } = useQuery(
+    [
+      "calculate-operator-max-level",
+      activeOperatorDetails.elite,
+      activeOperator?.rarity,
+    ],
+    {
+      queryFn: () => {
+        if (activeOperatorDetails.elite === null || !activeOperator) {
+          setActiveOperatorDetails((prev) => ({ ...prev, level: null }));
+          return null;
+        }
+        const maxLevel = calculateMaxLevel(
+          activeOperator.rarity,
+          activeOperatorDetails.elite
+        );
+        setActiveOperatorDetails((prev) => ({
+          ...prev,
+          level: maxLevel,
+        }));
+        console.log(maxLevel);
+        if (
+          activeOperatorDetails.level === null ||
+          (maxLevel && activeOperatorDetails.level > maxLevel)
+        ) {
+          setActiveOperatorDetails((prev) => ({
+            ...prev,
+            level: maxLevel,
+          }));
+        }
+        if (
+          activeOperatorDetails.elite === lastAddedOperator.elite &&
+          activeOperator.rarity === lastAddedOperator.rarity
+        ) {
+          setActiveOperatorDetails((prev) => ({
+            ...prev,
+            level: lastAddedOperator.level,
+          }));
+        }
+        return maxLevel;
+      },
+    }
+  );
+  const { data: operatorSkills } = useQuery({
+    queryKey: [
+      "get-operator-skills",
+      activeOperatorDetails.elite,
+      activeOperator?.rarity,
+    ],
+    queryFn: () => {
+      if (!activeOperator || activeOperatorDetails.elite === null) return null;
+      const skillArray = getSkill(
+        activeOperator.rarity,
+        activeOperatorDetails.elite
+      );
+      if (
+        activeOperatorDetails.skill &&
+        !skillArray.includes(activeOperatorDetails.skill)
+      ) {
+        setActiveOperatorDetails((prev) => ({
+          ...prev,
+          skill: null,
+          skillLevel: null,
+        }));
+      }
+      return skillArray;
+    },
+  });
+  const { data: operatorSkillLevels } = useQuery({
+    queryKey: ["get-operator-skill-levels", activeOperatorDetails.elite],
+    queryFn: () => {
+      if (activeOperatorDetails.elite === null) return null;
+      const skillLevelArray = getSkillLevel(activeOperatorDetails.elite);
+      const masteryArray = getMastery(activeOperatorDetails.elite);
+      if (
+        activeOperatorDetails.skillLevel &&
+        !skillLevelArray.includes(activeOperatorDetails.skillLevel)
+      ) {
+        setActiveOperatorDetails((prev) => ({
+          ...prev,
+          skillLevel: null,
+        }));
+      }
+      if (
+        activeOperatorDetails.mastery !== null &&
+        !masteryArray.includes(activeOperatorDetails.mastery)
+      ) {
+        setActiveOperatorDetails((prev) => ({
+          ...prev,
+          mastery: null,
+        }));
+      }
+      if (
+        activeOperatorDetails.skillLevel === null &&
+        activeOperatorDetails.mastery === null
+      ) {
+        setActiveOperatorDetails((prev) => ({
+          ...prev,
+          skillLevel: null,
+          mastery: null,
+        }));
+      }
+      return { skillLevelArray, masteryArray };
+    },
+  });
 
   const {
     data: youtubeData,
@@ -47,45 +199,53 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     isLoading: videoIsLoading,
     mutate,
   } = trpc.youtube.getVideo.useMutation();
-  const {
-    error: submitGuideError,
-    mutate: submitGuide,
-    isLoading: isSubmitting,
-  } = trpc.guide.submitGuide.useMutation({
-    onSuccess: () => {
-      toast.custom((t) => (
-        <Toast
-          message={`Guide submitted successfully!${
-            session.data?.user?.role === "ADMIN"
-              ? " It will show up once a moderator have approved it."
-              : ""
-          }`}
-          visible={t.visible}
-          duration={3000}
-          type="success"
-        />
-      ));
-      router.push("/");
-    },
-    onError: (error) => {
-      toast.custom((t) => (
-        <Toast
-          message={error.message}
-          visible={t.visible}
-          duration={3000}
-          type="error"
-        />
-      ));
-    },
-  });
+  const { mutate: submitGuide, isLoading: isSubmitting } =
+    trpc.guide.submitGuide.useMutation({
+      onSuccess: () => {
+        toast.custom((t) => (
+          <Toast
+            message={`Guide submitted successfully!${
+              session.data?.user?.role === "ADMIN"
+                ? " It will show up once a moderator have approved it."
+                : ""
+            }`}
+            visible={t.visible}
+            duration={3000}
+            type="success"
+          />
+        ));
+        router.push("/");
+      },
+      onError: (error) => {
+        toast.custom((t) => (
+          <Toast
+            message={error.message}
+            visible={t.visible}
+            duration={3000}
+            type="error"
+          />
+        ));
+      },
+    });
 
   const getVideoDetails = async () => {
     if (!videoUrlInputRef.current) return;
     mutate(videoUrlInputRef.current.value);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const addOperatorToList = () => {
+    if (!activeOperator) return;
+    const operatorToBeAdded: OperatorWithDetails = {
+      ...activeOperator,
+      ...activeOperatorDetails,
+    };
+    setSelectedOperators((prev) => [...prev, operatorToBeAdded]);
+    setActiveOperator(null);
+    setLastAddedOperator(operatorToBeAdded);
+  };
+
+  const handleSubmit = async () => {
+    // e.preventDefault();
     if (!youtubeData) {
       toast.custom((t) => (
         <Toast
@@ -134,16 +294,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
       id: youtubeData.id,
       title: youtubeData.title,
       stageId: selectedStage.id,
-      operators: selectedOperators.map((operator) => ({
-        id: operator.id,
-        elite: 0,
-        level: 1,
-        skill: 1,
-        skillLevel: 1,
-        mastery: 0,
-        hasModule: false,
-        moduleLevel: 1,
-      })),
+      operators: selectedOperators,
       tags: selectedTags.map((tag) => tag.id),
       uploadedById: youtubeData.channelId,
       uploadedByName: youtubeData.channelTitle,
@@ -197,7 +348,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           </div>
         </div>
       ) : null}
-      <form onSubmit={handleSubmit} className="mt-2 md:mt-5">
+      <div className="mt-2 md:mt-5">
         <h2 className="text-xl font-bold">
           Select Operators &#40;Click to Remove&#41;
         </h2>
@@ -207,44 +358,271 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
               .sort((a, b) => b.rarity - a.rarity)
               .map((operator) => {
                 return (
-                  <div
-                    key={operator.id}
-                    className={`${translateRarityToClassName(
-                      operator.rarity
-                    )} relative h-16 w-16 cursor-pointer overflow-hidden rounded-md`}
-                    onClick={() => {
-                      setSelectedOperators(
-                        selectedOperators.filter(
-                          (selectedOperator) =>
-                            selectedOperator.id !== operator.id
-                        )
-                      );
-                    }}
-                  >
-                    <Image
-                      src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
-                      alt={operator.name}
-                      width={64}
-                      height={64}
-                    />
-                    <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100">
-                      <p className="absolute bottom-0 w-full truncate px-1 text-center text-sm">
-                        {operator.name}
-                      </p>
+                  <React.Fragment key={operator.id}>
+                    <div
+                      className={`${translateRarityToClassName(
+                        operator.rarity
+                      )} relative h-16 w-16 cursor-pointer overflow-hidden rounded-md`}
+                      onClick={() => {
+                        setSelectedOperators(
+                          selectedOperators.filter(
+                            (selectedOperator) =>
+                              selectedOperator.id !== operator.id
+                          )
+                        );
+                      }}
+                    >
+                      <Image
+                        src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
+                        alt={operator.name}
+                        width={64}
+                        height={64}
+                      />
+                      <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100">
+                        <p className="absolute bottom-0 w-full truncate px-1 text-center text-sm">
+                          {operator.name}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                    <p>Elite: {operator.elite}</p>
+                  </React.Fragment>
                 );
               })}
           </div>
         ) : null}
         {/* TODO: Add input for skill, level, and modules.  */}
-        <SelectOperatorDropdown
-          operators={operatorList.filter(
-            (operator) => !selectedOperators.includes(operator)
-          )}
-          setSelectedOperators={setSelectedOperators}
-          className="mt-2"
-        />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            addOperatorToList();
+          }}
+          className="mt-2 w-full flex-col gap-2"
+        >
+          <div className="relative z-20">
+            <SelectOperatorDropdown
+              operators={operatorList.filter(
+                (operator) =>
+                  !selectedOperators.some(
+                    (selectedOperator) => selectedOperator.id === operator.id
+                  )
+              )}
+              handleSelectOperator={(operator) => {
+                setActiveOperator(operator);
+              }}
+              activeOperator={activeOperator}
+            />
+          </div>
+          <div className="relative z-10 my-2 mt-4 flex w-full max-w-[90vw] flex-col gap-3 md:flex-row md:gap-8">
+            <div className="z-50 grid w-auto max-w-[90vw] grid-cols-[80px_auto] gap-3 md:grid-cols-[100px_auto]">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold">Elite</h4>
+                <h4 className="font-bold">:</h4>
+              </div>
+              <Dropdown
+                options={
+                  operatorElite?.map((elite) => {
+                    return `Elite ${elite}`;
+                  }) || []
+                }
+                onChange={(v) => {
+                  setActiveOperatorDetails({
+                    ...activeOperatorDetails,
+                    elite: v === null ? null : parseInt(v.charAt(v.length - 1)),
+                  });
+                }}
+                selected={
+                  activeOperatorDetails.elite !== null
+                    ? `Elite ${activeOperatorDetails.elite}`
+                    : null
+                }
+                disabled={activeOperator === null}
+                hasNullOption={true}
+                className="w-full md:w-32 md:max-w-full"
+                optionsClassName="w-full z-50 md:w-32 md:max-w-full"
+              />
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold">Level</h4>
+                <h4 className="font-bold">:</h4>
+              </div>
+              <Input
+                type="number"
+                disabled={
+                  activeOperator === null ||
+                  activeOperatorDetails.elite === null
+                }
+                value={activeOperatorDetails.level ?? ""}
+                onChange={(e) => {
+                  if (e.target.value === "")
+                    return setActiveOperatorDetails({
+                      ...activeOperatorDetails,
+                      level: null,
+                    });
+                  const value = parseInt(e.target.value);
+                  if (!operatorMaxLevel) return;
+                  if (isNaN(value)) return;
+                  if (value > operatorMaxLevel || value < 0) {
+                    return;
+                  }
+                  setActiveOperatorDetails({
+                    ...activeOperatorDetails,
+                    level: value,
+                  });
+                }}
+                inputDivClassName="mb-0 md:mb-0 w-full md:w-32 md:max-w-full"
+                className="w-full text-base"
+              />
+            </div>
+            <div className="z-40 grid w-auto max-w-[90vw] grid-cols-[80px_auto] gap-3 md:grid-cols-[100px_auto]">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold">Skill</h4>
+                <h4 className="font-bold">:</h4>
+              </div>
+              <Dropdown
+                options={
+                  operatorSkills?.map((skill) => {
+                    return `Skill ${skill}`;
+                  }) || []
+                }
+                onChange={(v) => {
+                  setActiveOperatorDetails({
+                    ...activeOperatorDetails,
+                    skill: v === null ? null : parseInt(v.charAt(v.length - 1)),
+                  });
+                }}
+                selected={
+                  operatorSkills?.length === 1
+                    ? `Skill ${operatorSkills[0]}`
+                    : activeOperatorDetails.skill !== null
+                    ? `Skill ${activeOperatorDetails.skill}`
+                    : null
+                }
+                disabled={
+                  activeOperator === null ||
+                  activeOperator.rarity === 1 ||
+                  activeOperator.rarity === 2
+                }
+                hasNullOption={true}
+                nullOptionText="Unknown"
+                className="w-full md:w-32 md:max-w-full"
+                optionsClassName="w-full z-50 md:w-32 md:max-w-full"
+              />
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold">Skill Lvl</h4>
+                <h4 className="font-bold">:</h4>
+              </div>
+              <Dropdown
+                options={
+                  operatorSkillLevels?.skillLevelArray
+                    ?.map((skill) => {
+                      return `L${skill}`;
+                    })
+                    .concat(
+                      operatorSkillLevels.masteryArray.map(
+                        (mastery) => `M${mastery}`
+                      )
+                    )
+                    .filter((level) => level !== "M0") || []
+                }
+                onChange={(v) => {
+                  if (v === null) {
+                    setActiveOperatorDetails({
+                      ...activeOperatorDetails,
+                      skillLevel: null,
+                      mastery: null,
+                    });
+                    return;
+                  }
+                  if (v.charAt(0) === "L") {
+                    setActiveOperatorDetails({
+                      ...activeOperatorDetails,
+                      skillLevel: parseInt(v.charAt(v.length - 1)),
+                      mastery: 0,
+                    });
+                    return;
+                  }
+                  setActiveOperatorDetails({
+                    ...activeOperatorDetails,
+                    skillLevel: 7,
+                    mastery: parseInt(v.charAt(v.length - 1)),
+                  });
+                }}
+                selected={
+                  activeOperatorDetails.skillLevel !== null
+                    ? activeOperatorDetails.mastery
+                      ? `M${activeOperatorDetails.mastery}`
+                      : `L${activeOperatorDetails.skillLevel}`
+                    : null
+                }
+                disabled={
+                  activeOperatorDetails.skill === null ||
+                  activeOperator?.rarity === 1 ||
+                  activeOperator?.rarity === 2 ||
+                  activeOperator === null
+                }
+                hasNullOption={true}
+                nullOptionText="Unknown"
+                className="w-full md:w-32 md:max-w-full"
+                optionsClassName="w-full z-50 md:w-32 md:max-w-full"
+              />
+            </div>
+            <div className="z-30 grid w-auto max-w-[90vw] grid-cols-[80px_auto] gap-3 md:grid-cols-[100px_auto]">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold">Has Module</h4>
+                <h4 className="font-bold">:</h4>
+              </div>
+              <Dropdown
+                options={["Yes", "No"]}
+                onChange={(v) => {
+                  setActiveOperatorDetails({
+                    ...activeOperatorDetails,
+                    hasModule: v === null ? null : v === "Yes",
+                  });
+                }}
+                selected={
+                  activeOperatorDetails.hasModule !== null
+                    ? activeOperatorDetails.hasModule
+                      ? "Yes"
+                      : "No"
+                    : null
+                }
+                disabled={
+                  activeOperator === null ||
+                  activeOperatorDetails.elite === null ||
+                  activeOperatorDetails.elite < 2
+                }
+                hasNullOption={true}
+                className="w-full md:w-32 md:max-w-full"
+                optionsClassName="w-full z-50 md:w-32 md:max-w-full"
+              />
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold">Module Lvl</h4>
+                <h4 className="font-bold">:</h4>
+              </div>
+              <Dropdown
+                options={[1, 2, 3]}
+                onChange={(v) => {
+                  setActiveOperatorDetails({
+                    ...activeOperatorDetails,
+                    moduleLevel: v,
+                  });
+                }}
+                selected={activeOperatorDetails.moduleLevel}
+                disabled={
+                  activeOperator === null ||
+                  activeOperatorDetails.elite === null ||
+                  activeOperatorDetails.elite < 2 ||
+                  !activeOperatorDetails.hasModule
+                }
+                hasNullOption={true}
+                className="w-full md:w-32 md:max-w-full"
+                optionsClassName="w-full z-50 md:w-32 md:max-w-full"
+              />
+            </div>
+          </div>
+          <Button onClick={addOperatorToList} className="mt-4 w-full">
+            Add
+          </Button>
+        </form>
         <h2 className="mt-5 text-xl font-bold">
           Select Tags &#40;Click to Remove&#41;
         </h2>
@@ -298,10 +676,14 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           setSelectedStage={setSelectedStage}
           selectedStage={selectedStage}
         />
-        <Button className="my-5" type="submit" isLoading={isSubmitting}>
+        <Button
+          className="my-5"
+          onClick={handleSubmit}
+          isLoading={isSubmitting}
+        >
           Submit
         </Button>
-      </form>
+      </div>
     </>
   );
 };
