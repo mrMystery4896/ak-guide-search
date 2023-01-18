@@ -11,6 +11,7 @@ import { HiArrowsUpDown } from "react-icons/hi2";
 import Button from "../components/Button";
 import Dropdown from "../components/Dropdown";
 import Input from "../components/Input";
+import SelectedOperatorTable from "../components/SelectedOperatorTable";
 import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
 import SelectStageMenu from "../components/SelectStageMenu";
 import SelectTagDropdown from "../components/SelectTagDropdown";
@@ -107,7 +108,6 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           ...prev,
           level: maxLevel,
         }));
-        console.log(maxLevel);
         if (
           activeOperatorDetails.level === null ||
           (maxLevel && activeOperatorDetails.level > maxLevel)
@@ -348,56 +348,20 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           </div>
         </div>
       ) : null}
-      <div className="mt-2 md:mt-5">
-        <h2 className="text-xl font-bold">
-          Select Operators &#40;Click to Remove&#41;
-        </h2>
-        {selectedOperators.length > 0 ? (
-          <div className="my-2 flex flex-wrap gap-4">
-            {selectedOperators
-              .sort((a, b) => b.rarity - a.rarity)
-              .map((operator) => {
-                return (
-                  <React.Fragment key={operator.id}>
-                    <div
-                      className={`${translateRarityToClassName(
-                        operator.rarity
-                      )} relative h-16 w-16 cursor-pointer overflow-hidden rounded-md`}
-                      onClick={() => {
-                        setSelectedOperators(
-                          selectedOperators.filter(
-                            (selectedOperator) =>
-                              selectedOperator.id !== operator.id
-                          )
-                        );
-                      }}
-                    >
-                      <Image
-                        src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
-                        alt={operator.name}
-                        width={64}
-                        height={64}
-                      />
-                      <div className="absolute top-0 left-0 h-full w-full bg-gradient-to-t from-black to-transparent opacity-0 hover:opacity-100">
-                        <p className="absolute bottom-0 w-full truncate px-1 text-center text-sm">
-                          {operator.name}
-                        </p>
-                      </div>
-                    </div>
-                    <p>Elite: {operator.elite}</p>
-                  </React.Fragment>
-                );
-              })}
-          </div>
-        ) : null}
+      <div className="mt-2">
+        <h2 className="text-xl font-bold">Add Operators</h2>
         {/* TODO: Add input for skill, level, and modules.  */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             addOperatorToList();
           }}
-          className="mt-2 w-full flex-col gap-2"
+          className="mt-3 w-fit max-w-[85vw] flex-col gap-2"
         >
+          <SelectedOperatorTable
+            selectedOperators={selectedOperators}
+            setSelectedOperators={setSelectedOperators}
+          />
           <div className="relative z-20">
             <SelectOperatorDropdown
               operators={operatorList.filter(
@@ -412,7 +376,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
               activeOperator={activeOperator}
             />
           </div>
-          <div className="relative z-10 my-2 mt-4 flex w-full max-w-[90vw] flex-col gap-3 md:flex-row md:gap-8">
+          <div className="relative z-10 my-2 mt-3 flex w-full max-w-[90vw] flex-col gap-3 md:flex-row md:gap-8">
             <div className="z-50 grid w-auto max-w-[90vw] grid-cols-[80px_auto] gap-3 md:grid-cols-[100px_auto]">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold">Elite</h4>
@@ -619,7 +583,11 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
               />
             </div>
           </div>
-          <Button onClick={addOperatorToList} className="mt-4 w-full">
+          <Button
+            onClick={addOperatorToList}
+            disabled={activeOperator === null}
+            className="mt-4 w-full"
+          >
             Add
           </Button>
         </form>

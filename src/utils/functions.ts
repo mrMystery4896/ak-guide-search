@@ -141,3 +141,35 @@ export const getMastery = (elite: number) => {
   if (elite === 2) return [0, 1, 2, 3];
   return [];
 };
+
+export const formatEliteLevel = (
+  elite: number | null,
+  level: number | null
+) => {
+  if (elite === null && level === null) return "Unknown";
+  if (level === null) return `Elite ${elite}`;
+  return `E${elite} L${level}`;
+};
+
+export const formatSkillLevel = (
+  skill: number | null,
+  skillLevel: number | null,
+  mastery: number | null
+) => {
+  if (skill === null && skillLevel === null && mastery === null)
+    return "Unknown";
+  if (skill !== null && skillLevel == 7 && mastery !== null)
+    return `S${skill} M${mastery}`;
+  if (skill !== null && skillLevel !== null) return `S${skill} L${skillLevel}`;
+  if (skill !== null) return `S${skill}`;
+};
+
+export const formatModule = (
+  hasModule: boolean | null,
+  moduleLevel: number | null
+) => {
+  if (hasModule === null && moduleLevel === null) return "Unknown";
+  if (hasModule === false) return "No Module";
+  if (hasModule === true && moduleLevel === null) return "Has Module";
+  return `Module Level ${moduleLevel}`;
+};
