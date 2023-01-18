@@ -126,17 +126,23 @@ model Guide {
   @@index([uploadedById])
 }
 
+enum moduleType {
+  X
+  Y
+  None
+}
+
 model GuideOperator {
-  operator    Operator @relation(fields: [operatorId], references: [id])
+  operator    Operator    @relation(fields: [operatorId], references: [id])
   operatorId  String
-  guide       Guide    @relation(fields: [guideId], references: [id])
+  guide       Guide       @relation(fields: [guideId], references: [id])
   guideId     String
   elite       Int?
   level       Int?
   skill       Int?
   skillLevel  Int?
   mastery     Int?
-  hasModule   Boolean?
+  moduleType  moduleType?
   moduleLevel Int?
 
   @@id([operatorId, guideId])

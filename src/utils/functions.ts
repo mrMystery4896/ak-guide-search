@@ -165,11 +165,14 @@ export const formatSkillLevel = (
 };
 
 export const formatModule = (
-  hasModule: boolean | null,
+  moduleType: "X" | "Y" | "None" | null,
   moduleLevel: number | null
 ) => {
-  if (hasModule === null && moduleLevel === null) return "Unknown";
-  if (hasModule === false) return "No Module";
-  if (hasModule === true && moduleLevel === null) return "Has Module";
-  return `Module Level ${moduleLevel}`;
+  if (moduleType === null && moduleLevel === null) return "Unknown";
+  if (moduleType === "None") return "No Module";
+  if (moduleLevel === null) {
+    if (moduleType === "X") return "Module X";
+    if (moduleType === "Y") return "Module Y";
+  }
+  return `Module ${moduleType} L${moduleLevel}`;
 };

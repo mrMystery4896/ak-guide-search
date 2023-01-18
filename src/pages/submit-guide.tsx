@@ -18,7 +18,6 @@ import SelectTagDropdown from "../components/SelectTagDropdown";
 import TagCard from "../components/TagCard";
 import Toast from "../components/Toast";
 import Tooltip from "../components/Tooltip";
-import { env } from "../env/client.mjs";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
 import { prisma } from "../server/db/client";
 import { EventWithChildren, OperatorWithDetails } from "../utils/common-types";
@@ -27,7 +26,6 @@ import {
   calculateMaxLevel,
   getEvent,
   getSkill,
-  translateRarityToClassName,
   getSkillLevel,
   getMastery,
 } from "../utils/functions";
@@ -60,7 +58,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     skill: null,
     skillLevel: null,
     mastery: null,
-    hasModule: null,
+    moduleType: null,
     moduleLevel: null,
   });
   const [lastAddedOperator, setLastAddedOperator] = useState({
@@ -375,7 +373,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
               activeOperator={activeOperator}
             />
           </div>
-          <div className="relative z-10 my-2 mt-3 flex w-full max-w-[90vw] flex-col gap-3 md:flex-row md:gap-8">
+          <div className="relative z-10 my-2 mt-3 flex w-full max-w-[90vw] flex-col gap-3 md:flex-row md:flex-wrap md:gap-8">
             <div className="z-50 grid w-auto max-w-[90vw] grid-cols-[80px_auto] gap-3 md:grid-cols-[100px_auto]">
               <div className="flex items-center justify-between">
                 <h4 className="font-bold">Elite</h4>
@@ -534,20 +532,14 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                 <h4 className="font-bold">:</h4>
               </div>
               <Dropdown
-                options={["Yes", "No"]}
+                options={["X", "Y", "None"]}
                 onChange={(v) => {
                   setActiveOperatorDetails({
                     ...activeOperatorDetails,
-                    hasModule: v === null ? null : v === "Yes",
+                    moduleType: v,
                   });
                 }}
-                selected={
-                  activeOperatorDetails.hasModule !== null
-                    ? activeOperatorDetails.hasModule
-                      ? "Yes"
-                      : "No"
-                    : null
-                }
+                selected={activeOperatorDetails.moduleType ?? null}
                 disabled={
                   activeOperator === null ||
                   activeOperatorDetails.elite === null ||
@@ -574,7 +566,8 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                   activeOperator === null ||
                   activeOperatorDetails.elite === null ||
                   activeOperatorDetails.elite < 2 ||
-                  !activeOperatorDetails.hasModule
+                  activeOperatorDetails.moduleType === "None" ||
+                  activeOperatorDetails.moduleType === null
                 }
                 hasNullOption={true}
                 className="w-full md:w-32 md:max-w-full"

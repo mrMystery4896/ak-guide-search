@@ -57,11 +57,13 @@ export const guideRouter = router({
             skill: z.number().min(1).max(3).nullable(),
             skillLevel: z.number().min(1).max(7).nullable(),
             mastery: z.number().min(0).max(3).nullable(),
-            hasModule: z.boolean().nullable(),
+            moduleType: z
+              .string()
+              .regex(/X|Y|None/)
+              .nullable(),
             moduleLevel: z.number().min(1).max(3).nullable(),
           })
         ),
-        // operatorIds: z.array(z.string().min(1)),
         tags: z.array(z.string().cuid()),
         uploadedById: z.string().min(1),
         uploadedByName: z.string().min(1),
@@ -106,7 +108,7 @@ export const guideRouter = router({
                   skill: operator.skill,
                   skillLevel: operator.skillLevel,
                   mastery: operator.mastery,
-                  hasModule: operator.hasModule,
+                  moduleType: operator.moduleType as "X" | "Y" | "None" | null,
                   moduleLevel: operator.moduleLevel,
                 };
               }),

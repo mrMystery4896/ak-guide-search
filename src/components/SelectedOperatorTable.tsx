@@ -26,7 +26,7 @@ const SelectedOperatorTable: React.FC<SelectedOperatorTableProps> = ({
   if (selectedOperators.length === 0) return null;
 
   return (
-    <div className="my-4 grid max-w-[90vw] grid-cols-[auto_repeat(4,100px)] gap-2 overflow-x-auto scrollbar-thin md:grid-cols-[300px_repeat(4,100px)]">
+    <div className="my-4 grid max-w-[90vw] grid-cols-[auto_repeat(4,100px)] gap-2 overflow-x-auto md:grid-cols-[300px_repeat(4,100px)]">
       <h4 className="font-semibold">Operator</h4>
       <h4 className="font-semibold">Level</h4>
       <h4 className="font-semibold">Skill</h4>
@@ -69,7 +69,7 @@ const SelectedOperatorTable: React.FC<SelectedOperatorTableProps> = ({
               )}
             </p>
             <p className="flex items-center">
-              {formatModule(operator.hasModule, operator.moduleLevel)}
+              {formatModule(operator.moduleType, operator.moduleLevel)}
             </p>
             <div className="flex justify-center">
               <Button
