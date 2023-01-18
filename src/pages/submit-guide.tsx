@@ -338,6 +338,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
               alt={youtubeData.title}
               fill
               style={{ objectFit: "cover" }}
+              sizes="100%"
             />
           </div>
           <div className="mt-2 gap-2 md:ml-4 md:mt-0">
@@ -370,9 +371,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                     (selectedOperator) => selectedOperator.id === operator.id
                   )
               )}
-              handleSelectOperator={(operator) => {
-                setActiveOperator(operator);
-              }}
+              setActiveOperator={setActiveOperator}
               activeOperator={activeOperator}
             />
           </div>
@@ -531,7 +530,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
             </div>
             <div className="z-30 grid w-auto max-w-[90vw] grid-cols-[80px_auto] gap-3 md:grid-cols-[100px_auto]">
               <div className="flex items-center justify-between">
-                <h4 className="font-bold">Has Module</h4>
+                <h4 className="font-bold">Module</h4>
                 <h4 className="font-bold">:</h4>
               </div>
               <Dropdown

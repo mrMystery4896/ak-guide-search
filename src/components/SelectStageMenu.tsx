@@ -160,7 +160,7 @@ const SelectStageMenu: React.FC<SelectStageMenuProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="h-64 w-full overflow-y-scroll rounded-md bg-gray-300 p-2 overflow-x-hidden md:w-96">
+      <div className="h-64 w-full overflow-y-scroll rounded-md bg-gray-300 p-2 overflow-x-hidden">
         <StageMenu
           event={currentSelectedEvent}
           setMenuEventIdStack={setMenuEventIdStack}

@@ -9,6 +9,8 @@ import {
 import Image from "next/image.js";
 import React, { Fragment } from "react";
 import Button from "./Button";
+import { IoRemove } from "react-icons/io5";
+import { IoMdRemove } from "react-icons/io";
 
 interface SelectedOperatorTableProps {
   selectedOperators: OperatorWithDetails[];
@@ -29,7 +31,8 @@ const SelectedOperatorTable: React.FC<SelectedOperatorTableProps> = ({
       <h4 className="font-semibold">Level</h4>
       <h4 className="font-semibold">Skill</h4>
       <h4 className="font-semibold">Module</h4>
-      <h4 className="text-center font-semibold">Remove</h4>
+      <div />
+      {/* <h4 className="text-center font-semibold">Remove</h4> */}
       {selectedOperators.map((operator) => {
         return (
           <Fragment key={operator.id}>
@@ -70,7 +73,7 @@ const SelectedOperatorTable: React.FC<SelectedOperatorTableProps> = ({
             </p>
             <div className="flex justify-center">
               <Button
-                className="h-8 w-8"
+                className="h-8"
                 onClick={() => {
                   setSelectedOperators(
                     selectedOperators.filter(
@@ -79,7 +82,7 @@ const SelectedOperatorTable: React.FC<SelectedOperatorTableProps> = ({
                   );
                 }}
               >
-                -
+                <IoMdRemove />
               </Button>
             </div>
           </Fragment>

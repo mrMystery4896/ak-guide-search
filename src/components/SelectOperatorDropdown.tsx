@@ -8,11 +8,12 @@ import React from "react";
 import { translateRarityToClassName } from "../utils/functions";
 import { AnimatePresence, motion } from "framer-motion";
 import { BiX } from "react-icons/bi";
+import { BsCheck } from "react-icons/bs";
 
 interface SelectOperatorDropdownProps {
   operators: Operator[];
   activeOperator: Operator | null;
-  handleSelectOperator: (operator: Operator | null) => void;
+  setActiveOperator: React.Dispatch<React.SetStateAction<Operator | null>>;
   className?: string;
 }
 
@@ -53,9 +54,16 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
         <Combobox.Options
           onScroll={(e: React.UIEvent<HTMLElement>) => {
             const bottom =
-              e.currentTarget.scrollHeight - e.currentTarget.scrollTop ===
+              e.currentTarget.scrollHeight -
+                parseInt(e.currentTarget.scrollTop.toFixed(0)) ===
               e.currentTarget.clientHeight;
+            console.log(
+              e.currentTarget.scrollHeight,
+              e.currentTarget.scrollTop,
+              e.currentTarget.clientHeight
+            );
             if (bottom) {
+              console.log("bottom");
               setFilteredLength((prev) => prev + 10);
             }
           }}
@@ -82,27 +90,34 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
                   <Combobox.Option
                     as={React.Fragment}
                     key={operator.id}
-                    value={operator.id}
+                    value={operator}
                   >
                     {({ active, selected }) => (
                       <li
                         className={`${
-                          active || selected ? "bg-primary" : ""
-                        } flex h-12 cursor-pointer items-center gap-4 rounded-md p-2`}
+                          active ? "bg-primary" : ""
+                        } flex h-12 cursor-pointer items-center justify-between rounded-md p-2`}
                       >
-                        <div
-                          className={`relative min-h-[32px] min-w-[32px] overflow-hidden rounded-full ${translateRarityToClassName(
-                            operator.rarity
-                          )}`}
-                        >
-                          <Image
-                            src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
-                            alt={operator.id}
-                            width={32}
-                            height={32}
-                          />
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <div
+                              className={`relative min-h-[32px] min-w-[32px] overflow-hidden rounded-full ${translateRarityToClassName(
+                                operator.rarity
+                              )}`}
+                            >
+                              <Image
+                                src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
+                                alt={operator.id}
+                                width={32}
+                                height={32}
+                              />
+                            </div>
+                          </div>
+                          <span className="truncate" spellCheck={false}>
+                            {operator.name}
+                          </span>
                         </div>
-                        <span className="truncate">{operator.name}</span>
+                        {selected && <BsCheck className="h-6 w-6" />}
                       </li>
                     )}
                   </Combobox.Option>
@@ -123,25 +138,15 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
 
 const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
   operators,
-  handleSelectOperator,
   activeOperator,
+  setActiveOperator,
   className,
 }) => {
-  const [selectedOperatorId, setSelectedOperatorId] = useState("");
   const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    if (selectedOperatorId) {
-      const operatorToAdd = operators.find(
-        (operator) => operator.id === selectedOperatorId
-      );
-      handleSelectOperator(operatorToAdd ?? null);
-    } else handleSelectOperator(null);
-  }, [selectedOperatorId]);
 
   return (
     <>
-      <Combobox value={selectedOperatorId} onChange={setSelectedOperatorId}>
+      <Combobox value={activeOperator} onChange={setActiveOperator} nullable>
         {({ open }) => {
           return (
             <div className="relative">
@@ -171,8 +176,8 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
                       } placeholder:text-gray-100 focus:border-primary focus:outline-none`,
                       className
                     )}
-                    displayValue={() =>
-                      activeOperator ? activeOperator.name : ""
+                    displayValue={(operator: Operator | null) =>
+                      operator?.name ?? ""
                     }
                     placeholder="Search for an operator"
                   />
@@ -183,7 +188,7 @@ const SelectOperatorDropdown: React.FC<SelectOperatorDropdownProps> = ({
                     activeOperator ? "" : "hidden"
                   }`}
                   onClick={() => {
-                    setSelectedOperatorId("");
+                    setActiveOperator(null);
                   }}
                 >
                   <BiX className="mr-1 h-6 w-6" />
