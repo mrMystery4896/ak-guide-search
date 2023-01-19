@@ -34,6 +34,14 @@ interface EventListProps {
       stage?: Stage;
     }>
   >;
+  setMoveModalState: Dispatch<
+    SetStateAction<{
+      open: boolean;
+      event?: EventWithChildren;
+      stage?: Stage;
+      eventIdStack: string[];
+    }>
+  >;
   setDeleteModalState: Dispatch<
     SetStateAction<{
       open: boolean;
@@ -41,6 +49,7 @@ interface EventListProps {
       stage?: Stage;
     }>
   >;
+  parentEventIdStack?: string[];
 }
 
 const chevronVariants: Variants = {
@@ -58,7 +67,9 @@ const EventList: React.FC<EventListProps> = ({
   setAddEventModalState,
   setAddStageModalState,
   setEditModalState,
+  setMoveModalState,
   setDeleteModalState,
+  parentEventIdStack = [], // Used to keep track of the parent event ids for move modal
 }) => {
   const divRef = React.useRef<HTMLDivElement>(null);
 
@@ -238,10 +249,12 @@ const EventList: React.FC<EventListProps> = ({
                                               active ? "bg-primary" : ""
                                             } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                             onClick={() => {
-                                              setEditModalState({
+                                              setMoveModalState({
                                                 open: true,
                                                 event: event,
                                                 stage: undefined,
+                                                eventIdStack:
+                                                  parentEventIdStack,
                                               });
                                               close();
                                             }}
@@ -249,7 +262,7 @@ const EventList: React.FC<EventListProps> = ({
                                             <span>
                                               <BiMove />
                                             </span>
-                                            Move
+                                            Move Category
                                           </div>
                                         </div>
                                       );
@@ -303,7 +316,12 @@ const EventList: React.FC<EventListProps> = ({
                             setAddEventModalState={setAddEventModalState}
                             setAddStageModalState={setAddStageModalState}
                             setEditModalState={setEditModalState}
+                            setMoveModalState={setMoveModalState}
                             setDeleteModalState={setDeleteModalState}
+                            parentEventIdStack={[
+                              ...parentEventIdStack,
+                              event.id,
+                            ]}
                           />
                           {event.stages && !event.childEvents && (
                             <>
@@ -380,10 +398,12 @@ const EventList: React.FC<EventListProps> = ({
                                                             : ""
                                                         } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                                         onClick={() => {
-                                                          setEditModalState({
+                                                          setMoveModalState({
                                                             open: true,
                                                             event: event,
                                                             stage: stage,
+                                                            eventIdStack:
+                                                              parentEventIdStack,
                                                           });
                                                           close();
                                                         }}

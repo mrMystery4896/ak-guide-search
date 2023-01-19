@@ -1,4 +1,4 @@
-import { Stage } from "@prisma/client";
+import { Stage, Event } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
@@ -151,6 +151,83 @@ export const stageRouter = router({
           code: "INTERNAL_SERVER_ERROR",
           message: "Something went wrong. Please try again later.",
         });
+      }
+    }),
+  moveStage: protectedProcedure
+    .input(
+      z.object({
+        stageId: z.string().cuid({ message: "Invalid stage." }),
+        parentEventId: z
+          .string()
+          .cuid({ message: "Invalid stage." })
+          .nullable(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user.role !== "ADMIN")
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to perform this action.",
+        });
+      // check if parent stage exists and does not have child events
+      if (input.parentEventId !== null) {
+        let parentEvent: Event[];
+        try {
+          parentEvent = await ctx.prisma.event.findMany({
+            where: {
+              OR: [
+                {
+                  id: input.parentEventId,
+                },
+                {
+                  parentEventId: input.parentEventId,
+                },
+              ],
+            },
+          });
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Something went wrong. Please try again later.",
+          });
+        }
+        // check if parentEvent array has an element with the same id, if no, means destination event does not exist
+        if (
+          parentEvent.find((event) => event.id === input.parentEventId) ===
+          undefined
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Destination category does not exist.",
+          });
+        }
+        // check if parentEvent array has element with the same parentEventId, if yes, means destination event already has child event
+        if (
+          parentEvent.find(
+            (event) => event.parentEventId === input.parentEventId
+          ) !== undefined
+        ) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Destination category already has child category.",
+          });
+        }
+        // Move the event
+        try {
+          await ctx.prisma.stage.update({
+            where: {
+              id: input.stageId,
+            },
+            data: {
+              eventId: input.parentEventId,
+            },
+          });
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Something went wrong. Please try again later.",
+          });
+        }
       }
     }),
 });

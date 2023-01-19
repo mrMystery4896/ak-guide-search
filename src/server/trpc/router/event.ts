@@ -1,15 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { convertDateToUTCMinus7 } from "../../../utils/functions";
+import { convertDateToUTCMinus7, getEvent } from "../../../utils/functions";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 
 export const eventRouter = router({
-  getAllEvents: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.event.findMany({
-      orderBy: {
-        startDate: "desc",
-      },
-    });
+  getEventList: publicProcedure.query(async ({ ctx }) => {
+    return await getEvent();
   }),
   addEvent: protectedProcedure
     .input(
@@ -130,6 +126,73 @@ export const eventRouter = router({
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "An error occurred while updating the category.",
+        });
+      }
+    }),
+  moveEvent: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().cuid(),
+        parentEventId: z.string().cuid().nullable(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user.role !== "ADMIN") {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to perform this action.",
+        });
+      }
+      // Event cannot be moved to itself.
+      if (input.id === input.parentEventId) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Event cannot be moved to itself.",
+        });
+      }
+      // Check if desination event/category exists and does not have stages.
+      if (input.parentEventId !== null) {
+        const parentEvent = await ctx.prisma.event.findFirst({
+          where: {
+            id: input.parentEventId,
+          },
+          include: {
+            stages: true,
+          },
+        });
+        if (!parentEvent) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Destination category does not exist.",
+          });
+        }
+        if (parentEvent.stages.length > 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Cannot move to a category with stage.",
+          });
+        }
+      }
+      try {
+        if (input.parentEventId === null) {
+          return await ctx.prisma.event.update({
+            where: { id: input.id },
+            data: {
+              parentEvent: { disconnect: true },
+            },
+          });
+        } else {
+          return await ctx.prisma.event.update({
+            where: { id: input.id },
+            data: {
+              parentEvent: { connect: { id: input.parentEventId } },
+            },
+          });
+        }
+      } catch (e) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong. Please try again later.",
         });
       }
     }),

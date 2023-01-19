@@ -8,15 +8,17 @@ import { BsCheck } from "react-icons/bs";
 
 interface SelectStageMenuProps {
   eventList: EventWithChildren[];
-  setSelectedStage: Dispatch<SetStateAction<Stage | null>>;
-  selectedStage: Stage | null;
+  setSelectedStage?: Dispatch<SetStateAction<Stage | null>>;
+  selectedStage?: Stage | null;
+  onChange?: (event: EventWithChildren) => void;
+  initialEventStack?: string[];
 }
 
 interface StageMenuProps {
   event: EventWithChildren;
   setMenuEventIdStack: Dispatch<SetStateAction<string[]>>;
-  setSelectedStage: Dispatch<SetStateAction<Stage | null>>;
-  selectedStage: Stage | null;
+  setSelectedStage?: Dispatch<SetStateAction<Stage | null>>;
+  selectedStage?: Stage | null;
 }
 
 const StageMenu: React.FC<StageMenuProps> = ({
@@ -95,7 +97,10 @@ const StageMenu: React.FC<StageMenuProps> = ({
                         : ""
                     } flex cursor-pointer items-center justify-between rounded-md p-2`}
                     onClick={() => {
-                      setSelectedStage(selectedStage === stage ? null : stage);
+                      if (setSelectedStage)
+                        setSelectedStage(
+                          selectedStage === stage ? null : stage
+                        );
                     }}
                   >
                     <p className="select-none truncate">
@@ -126,6 +131,8 @@ const SelectStageMenu: React.FC<SelectStageMenuProps> = ({
   eventList,
   setSelectedStage,
   selectedStage,
+  onChange,
+  initialEventStack = [],
 }) => {
   const rootEvent = {
     id: "",
@@ -138,7 +145,8 @@ const SelectStageMenu: React.FC<SelectStageMenuProps> = ({
     parentEvent: null,
     stages: [] as Stage[],
   };
-  const [menuEventIdStack, setMenuEventIdStack] = useState<string[]>([]);
+  const [menuEventIdStack, setMenuEventIdStack] =
+    useState<string[]>(initialEventStack);
   const [currentSelectedEvent, setCurrentSelectedEvent] =
     useState<EventWithChildren>(rootEvent);
 
@@ -157,6 +165,10 @@ const SelectStageMenu: React.FC<SelectStageMenuProps> = ({
     }
     currentEvent && setCurrentSelectedEvent(currentEvent);
   }, [menuEventIdStack]);
+
+  useEffect(() => {
+    onChange && onChange(currentSelectedEvent);
+  }, [currentSelectedEvent]);
 
   return (
     <AnimatePresence>
