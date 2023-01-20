@@ -9,6 +9,7 @@ import { translateRarityToClassName } from "../utils/functions";
 import { AnimatePresence, motion } from "framer-motion";
 import { BiX } from "react-icons/bi";
 import { BsCheck } from "react-icons/bs";
+import { FixedSizeList } from "react-window";
 
 interface SelectOperatorDropdownProps {
   operators: Operator[];
@@ -32,18 +33,32 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
   operators,
   activeOperator,
 }) => {
-  const [filteredLength, setFilteredLength] = useState(10);
+  const [filteredOperators, setFilteredOperators] =
+    useState<Operator[]>(operators);
+
+  const listRef = React.createRef<FixedSizeList<Operator[]>>();
+
+  useEffect(() => {
+    setFilteredOperators(operators);
+  }, [operators]);
+
+  useEffect(() => {
+    setFilteredOperators(
+      operators.filter((operator) => {
+        return operator.name.toLowerCase().startsWith(query.toLowerCase());
+      })
+    );
+  }, [query]);
 
   useEffect(() => {
     if (!open) {
-      setFilteredLength(10);
       setQuery("");
     } else {
       const index = operators.findIndex(
         (operator) => operator.id === activeOperator?.id
       );
       if (index > 0) {
-        setFilteredLength(index + 10);
+        listRef.current?.scrollToItem(index, "center");
       }
     }
   }, [open]);
@@ -52,77 +67,29 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
     <AnimatePresence>
       {open && (
         <Combobox.Options
-          onScroll={(e: React.UIEvent<HTMLElement>) => {
-            const bottom =
-              e.currentTarget.scrollHeight -
-                parseInt(e.currentTarget.scrollTop.toFixed(0)) ===
-              e.currentTarget.clientHeight;
-            console.log(
-              e.currentTarget.scrollHeight,
-              e.currentTarget.scrollTop,
-              e.currentTarget.clientHeight
-            );
-            if (bottom) {
-              console.log("bottom");
-              setFilteredLength((prev) => prev + 10);
-            }
-          }}
           as={motion.ul}
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 5 }}
           transition={{ duration: 0.2 }}
           static
-          className="absolute z-10 mt-1 max-h-52 w-64 translate-y-1 overflow-auto rounded-md bg-gray-300 p-2 drop-shadow-lg"
+          className="absolute z-10 mt-1 max-h-52 w-64 translate-y-1 overflow-auto rounded-md bg-gray-300 drop-shadow-lg"
         >
-          {operators.filter((operator) => {
-            return operator.name.toLowerCase().startsWith(query.toLowerCase());
-          }).length > 0 ? (
-            operators
-              .filter((operator) => {
-                return operator.name
-                  .toLowerCase()
-                  .startsWith(query.toLowerCase());
-              })
-              .slice(0, filteredLength)
-              .map((operator) => {
-                return (
-                  <Combobox.Option
-                    as={React.Fragment}
-                    key={operator.id}
-                    value={operator}
-                  >
-                    {({ active, selected }) => (
-                      <li
-                        className={`${
-                          active ? "bg-primary" : ""
-                        } flex h-12 cursor-pointer items-center justify-between rounded-md p-2`}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div>
-                            <div
-                              className={`relative min-h-[32px] min-w-[32px] overflow-hidden rounded-full ${translateRarityToClassName(
-                                operator.rarity
-                              )}`}
-                            >
-                              <Image
-                                src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
-                                alt={operator.id}
-                                width={32}
-                                height={32}
-                              />
-                            </div>
-                          </div>
-                          <span className="truncate" spellCheck={false}>
-                            {operator.name}
-                          </span>
-                        </div>
-                        {selected && <BsCheck className="h-6 w-6" />}
-                      </li>
-                    )}
-                  </Combobox.Option>
-                );
-              })
+          {filteredOperators.length > 0 ? (
+            <FixedSizeList
+              height={Math.min(208, filteredOperators.length * 48 + 18)}
+              width={256}
+              itemCount={filteredOperators.length}
+              itemSize={48}
+              itemData={filteredOperators}
+              itemKey={(index, data) => {
+                const operator: Operator = data[index] as Operator;
+                return operator.id;
+              }}
+              ref={listRef}
+            >
+              {Row}
+            </FixedSizeList>
           ) : (
             <Combobox.Option disabled value="">
               <p className="select-none p-2 text-gray-100">
@@ -133,6 +100,51 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
         </Combobox.Options>
       )}
     </AnimatePresence>
+  );
+};
+
+const Row = ({
+  index,
+  style,
+  data,
+}: {
+  index: number;
+  style: React.CSSProperties;
+  data: Operator[];
+}) => {
+  const operator: Operator = data[index] as Operator;
+
+  return (
+    <Combobox.Option value={operator} style={style}>
+      {({ active, selected }) => (
+        <div
+          className={`m-2 flex cursor-pointer items-center gap-4 rounded-md p-1 py-2 ${
+            active ? "bg-primary" : ""
+          }`}
+        >
+          <div className="flex w-full items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div
+                className={`relative min-h-[32px] min-w-[32px] overflow-hidden rounded-full ${translateRarityToClassName(
+                  operator.rarity
+                )}`}
+              >
+                <Image
+                  src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/operator-thumbnail/${operator.id}.png`}
+                  alt={operator.id}
+                  width={32}
+                  height={32}
+                />
+              </div>
+              <span className="truncate" spellCheck={false}>
+                {operator.name}
+              </span>
+            </div>
+            {selected && <BsCheck className="h-6 w-6" />}
+          </div>
+        </div>
+      )}
+    </Combobox.Option>
   );
 };
 
