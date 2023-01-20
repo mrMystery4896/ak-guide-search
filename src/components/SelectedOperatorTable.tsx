@@ -74,6 +74,7 @@ const SelectedOperatorTable: React.FC<SelectedOperatorTableProps> = ({
             <div className="flex justify-center">
               <Button
                 className="h-8"
+                type="button"
                 onClick={() => {
                   setSelectedOperators(
                     selectedOperators.filter(

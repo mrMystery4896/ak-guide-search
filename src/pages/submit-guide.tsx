@@ -203,7 +203,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
         toast.custom((t) => (
           <Toast
             message={`Guide submitted successfully!${
-              session.data?.user?.role === "ADMIN"
+              session.data?.user?.role === "USER"
                 ? " It will show up once a moderator have approved it."
                 : ""
             }`}
@@ -579,6 +579,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
             onClick={addOperatorToList}
             disabled={activeOperator === null}
             className="mt-4 w-full"
+            type="submit"
           >
             Add
           </Button>
