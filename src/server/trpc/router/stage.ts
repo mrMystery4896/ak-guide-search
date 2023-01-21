@@ -230,4 +230,45 @@ export const stageRouter = router({
         }
       }
     }),
+  deleteStage: protectedProcedure
+    .input(z.string().cuid())
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user.role !== "ADMIN")
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to perform this action.",
+        });
+      // check if stage exists
+      let stage: Stage | null;
+      try {
+        stage = await ctx.prisma.stage.findFirst({
+          where: {
+            id: input,
+          },
+        });
+      } catch (e) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong. Please try again later.",
+        });
+      }
+      if (stage === null) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Stage does not exist.",
+        });
+      }
+      try {
+        await ctx.prisma.stage.delete({
+          where: {
+            id: input,
+          },
+        });
+      } catch (error) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong. Please try again later.",
+        });
+      }
+    }),
 });

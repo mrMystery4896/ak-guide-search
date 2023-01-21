@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { convertDateToUTCMinus7, getEvent } from "../../../utils/functions";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { Event } from "@prisma/client";
 
 export const eventRouter = router({
   getEventList: publicProcedure.query(async ({ ctx }) => {
@@ -189,6 +190,54 @@ export const eventRouter = router({
             },
           });
         }
+      } catch (e) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong. Please try again later.",
+        });
+      }
+    }),
+  deleteEvent: protectedProcedure
+    .input(z.array(z.string().cuid()))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.session.user.role !== "ADMIN") {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to perform this action.",
+        });
+      }
+
+      let event: Event[] = [];
+
+      try {
+        event = await ctx.prisma.event.findMany({
+          where: {
+            id: {
+              in: input,
+            },
+          },
+        });
+      } catch (e) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something went wrong. Please try again later.",
+        });
+      }
+
+      if (event.length !== input.length) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Event does not exist.",
+        });
+      }
+
+      try {
+        await ctx.prisma.$transaction(
+          // Delete events in reverse order to avoid foreign key constraint error.
+          input
+            .reverse()
+            .map((id) => ctx.prisma.event.delete({ where: { id } }))
+        );
       } catch (e) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

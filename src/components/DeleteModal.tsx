@@ -1,9 +1,12 @@
 import { Dialog } from "@headlessui/react";
 import { Stage } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/router";
+import { toast } from "react-hot-toast";
 import { EventWithChildren } from "../utils/common-types";
+import { trpc } from "../utils/trpc";
 import Button from "./Button";
-import Input from "./Input";
+import Toast from "./Toast";
 
 interface DeleteModalProps {
   modalState: {
@@ -24,6 +27,68 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
   modalState,
   setModalState,
 }) => {
+  const router = useRouter();
+
+  const { isLoading: deletingStage, mutate: deleteStage } =
+    trpc.stage.deleteStage.useMutation({
+      onSuccess: () => {
+        toast.custom((t) => (
+          <Toast
+            message="Stage deleted successfully"
+            type="success"
+            duration={t.duration}
+            visible={t.visible}
+          />
+        ));
+        setModalState({
+          open: false,
+          event: undefined,
+          stage: undefined,
+        });
+        router.replace(router.asPath);
+      },
+      onError: (error) => {
+        toast.custom((t) => (
+          <Toast
+            message={error.message}
+            type="error"
+            duration={t.duration}
+            visible={t.visible}
+          />
+        ));
+      },
+    });
+
+  const { isLoading: deletingEvent, mutate: deleteEvent } =
+    trpc.event.deleteEvent.useMutation({
+      onSuccess: () => {
+        toast.custom((t) => (
+          <Toast
+            message="Event deleted successfully"
+            type="success"
+            duration={t.duration}
+            visible={t.visible}
+          />
+        ));
+        setModalState({
+          open: false,
+          event: undefined,
+          stage: undefined,
+        });
+        router.replace(router.asPath);
+      },
+      onError: (error) => {
+        toast.custom((t) => (
+          <Toast
+            message={error.message}
+            type="error"
+            duration={t.duration}
+            visible={t.visible}
+          />
+        ));
+      },
+    });
+
   return (
     <>
       <AnimatePresence>
@@ -61,6 +126,33 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
                 <Dialog.Title className="mb-4 text-xl font-bold">
                   Delete {modalState.stage?.stageCode ?? modalState.event.name}
                 </Dialog.Title>
+                Are you sure you want to delete{" "}
+                {(modalState.stage?.stageCode || modalState.stage?.stageName) ??
+                  modalState.event.name}
+                ?
+                <Button
+                  onClick={() => {
+                    if (modalState.stage !== undefined) {
+                      deleteStage(modalState.stage.id);
+                    } else if (modalState.event !== undefined) {
+                      //flatten the event object
+                      let events: EventWithChildren[] = [];
+                      const flattenEvents = (event: EventWithChildren) => {
+                        events.push(event);
+                        if (event.childEvents)
+                          event.childEvents.forEach((child) =>
+                            flattenEvents(child)
+                          );
+                      };
+                      if (modalState.event) flattenEvents(modalState.event);
+                      deleteEvent(events.map((e) => e.id));
+                    }
+                  }}
+                  isLoading={deletingStage || deletingEvent}
+                  className="ml-auto mt-2 bg-red disabled:bg-red/50"
+                >
+                  Delete
+                </Button>
               </Dialog.Panel>
             </div>
           </Dialog>

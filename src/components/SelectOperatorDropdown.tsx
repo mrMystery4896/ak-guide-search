@@ -73,12 +73,12 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
           exit={{ opacity: 0, y: 5 }}
           transition={{ duration: 0.2 }}
           static
-          className="absolute z-10 mt-1 max-h-52 w-64 translate-y-1 overflow-auto rounded-md bg-gray-300 drop-shadow-lg"
+          className="absolute z-10 mt-1 max-h-52 w-full translate-y-1 overflow-auto rounded-md bg-gray-300 drop-shadow-lg md:w-64"
         >
           {filteredOperators.length > 0 ? (
             <FixedSizeList
               height={Math.min(208, filteredOperators.length * 48 + 18)}
-              width={256}
+              width="100%"
               itemCount={filteredOperators.length}
               itemSize={48}
               itemData={filteredOperators}

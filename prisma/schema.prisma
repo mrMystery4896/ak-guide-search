@@ -83,7 +83,7 @@ model Stage {
   stageCode String? @unique
   stageName String
   guides    Guide[]
-  event     Event   @relation(fields: [eventId], references: [id])
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId   String
 
   @@index([eventId])
@@ -110,7 +110,7 @@ enum Status {
 model Guide {
   id            String          @id @default(cuid())
   title         String
-  stage         Stage           @relation(fields: [stageId], references: [id])
+  stage         Stage           @relation(fields: [stageId], references: [id], onDelete: Cascade)
   stageId       String
   guideOperator GuideOperator[]
   tags          Tag[]
@@ -135,7 +135,7 @@ enum moduleType {
 model GuideOperator {
   operator    Operator    @relation(fields: [operatorId], references: [id])
   operatorId  String
-  guide       Guide       @relation(fields: [guideId], references: [id])
+  guide       Guide       @relation(fields: [guideId], references: [id], onDelete: Cascade)
   guideId     String
   elite       Int?
   level       Int?
