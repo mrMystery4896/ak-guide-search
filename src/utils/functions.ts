@@ -142,6 +142,20 @@ export const getMastery = (elite: number) => {
   return [];
 };
 
+export const getModule = (
+  elite: number,
+  rarity: number
+): ("X" | "Y" | "None")[] => {
+  switch (rarity) {
+    case 1:
+    case 2:
+    case 3:
+      return ["None"];
+    default:
+      return elite >= 2 ? ["None", "X", "Y"] : ["None"];
+  }
+};
+
 export const formatEliteLevel = (
   elite: number | null,
   level: number | null

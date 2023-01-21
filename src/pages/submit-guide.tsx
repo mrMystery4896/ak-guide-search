@@ -5,7 +5,7 @@ import { GetServerSideProps, type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { HiArrowsUpDown } from "react-icons/hi2";
 import Button from "../components/Button";
@@ -28,6 +28,7 @@ import {
   getSkill,
   getSkillLevel,
   getMastery,
+  getModule,
 } from "../utils/functions";
 import { trpc } from "../utils/trpc";
 
@@ -190,6 +191,40 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
       return { skillLevelArray, masteryArray };
     },
   });
+  const { data: operatorModules } = useQuery({
+    queryKey: [
+      "get-operator-modules",
+      activeOperatorDetails.elite,
+      activeOperator?.rarity,
+    ],
+    queryFn: () => {
+      if (!activeOperator || activeOperatorDetails.elite === null) return null;
+      const moduleArray = getModule(
+        activeOperatorDetails.elite,
+        activeOperator.rarity
+      );
+      // if module type is not in the array, reset module and module level
+      if (
+        activeOperatorDetails.moduleType &&
+        !moduleArray.includes(activeOperatorDetails.moduleType)
+      ) {
+        setActiveOperatorDetails((prev) => ({
+          ...prev,
+          module: null,
+          moduleLevel: null,
+        }));
+      }
+      // if elite <= 3, set module to none, since they don't have modules
+      if (activeOperatorDetails.elite <= 3) {
+        setActiveOperatorDetails((prev) => ({
+          ...prev,
+          moduleType: "None",
+          moduleLevel: null,
+        }));
+      }
+      return moduleArray;
+    },
+  });
 
   const {
     data: youtubeData,
@@ -226,7 +261,8 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
       },
     });
 
-  const getVideoDetails = async () => {
+  const getVideoDetails = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     if (!videoUrlInputRef.current) return;
     mutate(videoUrlInputRef.current.value);
   };
@@ -243,7 +279,6 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
   };
 
   const handleSubmit = async () => {
-    // e.preventDefault();
     if (!youtubeData) {
       toast.custom((t) => (
         <Toast
@@ -307,7 +342,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
         YouTube Link
         <Tooltip content="test" />
       </h2>
-      <div className="mt-3 flex w-full">
+      <form onSubmit={getVideoDetails} className="mt-3 flex w-full">
         <Input
           type="text"
           placeholder="Link to Guide on YouTube"
@@ -317,16 +352,11 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           }
           className="mr-4 w-[50vw]"
         />
-        <Button
-          onClick={getVideoDetails}
-          type="button"
-          isLoading={videoIsLoading}
-          className="h-full"
-        >
+        <Button isLoading={videoIsLoading} className="h-full">
           <HiArrowsUpDown className="inline-block md:mr-2" />
           <span className="hidden md:inline-block">Fetch</span>
         </Button>
-      </div>
+      </form>
       {/* Loading state for fetching video */}
       {youtubeData ? (
         <div className="mt-4 flex flex-col md:flex-row">
@@ -398,6 +428,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                 }
                 disabled={activeOperator === null}
                 hasNullOption={true}
+                nullOptionText="N/A"
                 className="w-full md:w-32 md:max-w-full"
                 optionsClassName="w-full z-50 md:w-32 md:max-w-full"
               />
@@ -463,7 +494,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                   activeOperator.rarity === 2
                 }
                 hasNullOption={true}
-                nullOptionText="Unknown"
+                nullOptionText="N/A"
                 className="w-full md:w-32 md:max-w-full"
                 optionsClassName="w-full z-50 md:w-32 md:max-w-full"
               />
@@ -521,7 +552,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                   activeOperator === null
                 }
                 hasNullOption={true}
-                nullOptionText="Unknown"
+                nullOptionText="N/A"
                 className="w-full md:w-32 md:max-w-full"
                 optionsClassName="w-full z-50 md:w-32 md:max-w-full"
               />
@@ -532,7 +563,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                 <h4 className="font-bold">:</h4>
               </div>
               <Dropdown
-                options={["X", "Y", "None"]}
+                options={operatorModules ?? []}
                 onChange={(v) => {
                   setActiveOperatorDetails({
                     ...activeOperatorDetails,
@@ -545,7 +576,14 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                   activeOperatorDetails.elite === null ||
                   activeOperatorDetails.elite < 2
                 }
-                hasNullOption={true}
+                hasNullOption={
+                  !!(
+                    (activeOperatorDetails.elite &&
+                      activeOperatorDetails.elite >= 2) ||
+                    activeOperator === null
+                  )
+                }
+                nullOptionText="N/A"
                 className="w-full md:w-32 md:max-w-full"
                 optionsClassName="w-full z-50 md:w-32 md:max-w-full"
               />
@@ -570,6 +608,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                   activeOperatorDetails.moduleType === null
                 }
                 hasNullOption={true}
+                nullOptionText="N/A"
                 className="w-full md:w-32 md:max-w-full"
                 optionsClassName="w-full z-50 md:w-32 md:max-w-full"
               />

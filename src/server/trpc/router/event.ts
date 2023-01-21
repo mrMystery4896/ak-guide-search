@@ -93,7 +93,6 @@ export const eventRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      console.log(input);
       if (ctx.session.user.role !== "ADMIN") {
         throw new TRPCError({
           code: "UNAUTHORIZED",

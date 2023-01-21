@@ -9,6 +9,7 @@ import { twMerge } from "tailwind-merge";
 type DropdownProps<T> = {
   options: T[];
   selected: T | null;
+  value?: T | null;
   onChange: (value: T | null) => void;
   disabled?: boolean;
   hasNullOption?: boolean;
@@ -32,13 +33,17 @@ const Dropdown = <T extends number | string>({
   onChange,
   disabled = false,
   hasNullOption = false,
-  nullOptionText = "Unknown",
+  nullOptionText = "N/A",
   className = "",
   optionsClassName = "",
 }: DropdownProps<T>) => {
   useEffect(() => {
     if (disabled) onChange(null);
   }, [disabled]);
+
+  useEffect(() => {
+    if (selected && !options.includes(selected)) onChange(options[0] ?? null);
+  }, [options]);
 
   return (
     <Listbox
@@ -60,13 +65,13 @@ const Dropdown = <T extends number | string>({
           >
             {({ value }) => (
               <>
-                {disabled
-                  ? ""
-                  : selected === null
-                  ? hasNullOption
-                    ? nullOptionText
-                    : "Select an option"
-                  : value}
+                <p className={`${disabled ? "text-white/50" : ""} truncate`}>
+                  {selected === null
+                    ? hasNullOption
+                      ? nullOptionText
+                      : "Select an option"
+                    : selected}
+                </p>
                 <motion.span
                   variants={chevronVariants}
                   animate={open ? "up" : "down"}
