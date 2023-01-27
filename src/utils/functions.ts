@@ -96,7 +96,7 @@ export const calculateMaxLevel = (rarity: number, elite: number) => {
     case 2:
       return 30;
     case 3:
-      return elite === 0 ? 30 : 40;
+      return elite === 0 ? 40 : 55;
     case 4:
       return elite === 0 ? 45 : elite === 1 ? 60 : 70;
     case 5:
@@ -172,7 +172,7 @@ export const formatSkillLevel = (
 ) => {
   if (skill === null && skillLevel === null && mastery === null)
     return "Unknown";
-  if (skill !== null && skillLevel == 7 && mastery !== null)
+  if (skillLevel == 7 && mastery !== null && mastery !== 0)
     return `S${skill} M${mastery}`;
   if (skill !== null && skillLevel !== null) return `S${skill} L${skillLevel}`;
   if (skill !== null) return `S${skill}`;

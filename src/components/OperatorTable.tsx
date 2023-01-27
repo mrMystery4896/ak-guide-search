@@ -9,30 +9,34 @@ import {
 import Image from "next/image.js";
 import React, { Fragment } from "react";
 import Button from "./Button";
-import { IoRemove } from "react-icons/io5";
 import { IoMdRemove } from "react-icons/io";
 
-interface SelectedOperatorTableProps {
+type SelectedOperatorTableProps = {
   selectedOperators: OperatorWithDetails[];
-  setSelectedOperators: React.Dispatch<
+  setSelectedOperators?: React.Dispatch<
     React.SetStateAction<OperatorWithDetails[]>
   >;
-}
+};
 
 const SelectedOperatorTable: React.FC<SelectedOperatorTableProps> = ({
   selectedOperators,
-  setSelectedOperators,
+  setSelectedOperators, // if this is undefined, it means that the table is not editable (no remove operator button)
 }) => {
   if (selectedOperators.length === 0) return null;
 
   return (
-    <div className="my-4 grid max-w-[90vw] grid-cols-[auto_repeat(4,100px)] gap-2 overflow-x-auto md:grid-cols-[300px_repeat(4,100px)]">
+    <div
+      className={`my-4 grid max-w-[90vw] ${
+        setSelectedOperators
+          ? "grid-cols-[auto_repeat(4,100px)]"
+          : "grid-cols-[auto_repeat(3,100px)]"
+      } gap-2 overflow-x-auto md:w-full`}
+    >
       <h4 className="font-semibold">Operator</h4>
       <h4 className="font-semibold">Level</h4>
       <h4 className="font-semibold">Skill</h4>
       <h4 className="font-semibold">Module</h4>
-      <div />
-      {/* <h4 className="text-center font-semibold">Remove</h4> */}
+      {setSelectedOperators && <div />}
       {selectedOperators.map((operator) => {
         return (
           <Fragment key={operator.id}>
@@ -40,13 +44,17 @@ const SelectedOperatorTable: React.FC<SelectedOperatorTableProps> = ({
               <div
                 className={`${translateRarityToClassName(
                   operator.rarity
-                )} relative h-9 w-9 overflow-hidden rounded-full`}
+                )} relative h-9 w-9 overflow-hidden rounded-full ${
+                  setSelectedOperators ? "cursor-pointer" : "cursor-default"
+                }`}
                 onClick={() => {
-                  setSelectedOperators(
-                    selectedOperators.filter(
-                      (selectedOperator) => selectedOperator.id !== operator.id
-                    )
-                  );
+                  setSelectedOperators &&
+                    setSelectedOperators(
+                      selectedOperators.filter(
+                        (selectedOperator) =>
+                          selectedOperator.id !== operator.id
+                      )
+                    );
                 }}
               >
                 <Image
@@ -71,21 +79,24 @@ const SelectedOperatorTable: React.FC<SelectedOperatorTableProps> = ({
             <p className="flex items-center">
               {formatModule(operator.moduleType, operator.moduleLevel)}
             </p>
-            <div className="flex justify-center">
-              <Button
-                className="h-8"
-                type="button"
-                onClick={() => {
-                  setSelectedOperators(
-                    selectedOperators.filter(
-                      (selectedOperator) => selectedOperator.id !== operator.id
-                    )
-                  );
-                }}
-              >
-                <IoMdRemove />
-              </Button>
-            </div>
+            {setSelectedOperators && (
+              <div className="flex justify-center">
+                <Button
+                  className="h-8"
+                  type="button"
+                  onClick={() => {
+                    setSelectedOperators(
+                      selectedOperators.filter(
+                        (selectedOperator) =>
+                          selectedOperator.id !== operator.id
+                      )
+                    );
+                  }}
+                >
+                  <IoMdRemove />
+                </Button>
+              </div>
+            )}
           </Fragment>
         );
       })}

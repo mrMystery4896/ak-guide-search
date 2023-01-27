@@ -39,7 +39,11 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
             </button>
           </span>
         </div>
-        <Button className="rounded-l-none rounded-r-md">
+        <Button
+          whileHover={undefined}
+          whileTap={undefined}
+          className="rounded-l-none rounded-r-md"
+        >
           <FaFilter />
         </Button>
       </div>

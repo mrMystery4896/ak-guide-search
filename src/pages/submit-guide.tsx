@@ -11,7 +11,7 @@ import { HiArrowsUpDown } from "react-icons/hi2";
 import Button from "../components/Button";
 import Dropdown from "../components/Dropdown";
 import Input from "../components/Input";
-import SelectedOperatorTable from "../components/SelectedOperatorTable";
+import OperatorTable from "../components/OperatorTable";
 import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
 import SelectStageMenu from "../components/SelectStageMenu";
 import SelectTagDropdown from "../components/SelectTagDropdown";
@@ -151,11 +151,21 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           skillLevel: null,
         }));
       }
+      if (skillArray.length === 1) {
+        setActiveOperatorDetails((prev) => ({
+          ...prev,
+          skill: skillArray[0] ?? null,
+        }));
+      }
       return skillArray;
     },
   });
   const { data: operatorSkillLevels } = useQuery({
-    queryKey: ["get-operator-skill-levels", activeOperatorDetails.elite],
+    queryKey: [
+      "get-operator-skill-levels",
+      activeOperatorDetails.elite,
+      activeOperatorDetails.skill,
+    ],
     queryFn: () => {
       if (activeOperatorDetails.elite === null) return null;
       const skillLevelArray = getSkillLevel(activeOperatorDetails.elite);
@@ -225,6 +235,10 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
       return moduleArray;
     },
   });
+
+  useEffect(() => {
+    console.log(activeOperatorDetails.skill);
+  }, [activeOperatorDetails.skill]);
 
   const {
     data: youtubeData,
@@ -387,9 +401,9 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
           }}
           className="mt-3 w-fit max-w-[85vw] flex-col gap-2"
         >
-          <SelectedOperatorTable
+          <OperatorTable
             selectedOperators={selectedOperators}
-            setSelectedOperators={setSelectedOperators}
+            // setSelectedOperators={setSelectedOperators}
           />
           <div className="relative z-20">
             <SelectOperatorDropdown
@@ -482,16 +496,18 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                   });
                 }}
                 selected={
-                  operatorSkills?.length === 1
-                    ? `Skill ${operatorSkills[0]}`
-                    : activeOperatorDetails.skill !== null
-                    ? `Skill ${activeOperatorDetails.skill}`
+                  activeOperatorDetails.skill !== null ||
+                  operatorSkills?.length === 0
+                    ? operatorSkills?.length === 1
+                      ? `Skill ${operatorSkills[0]}`
+                      : `Skill ${activeOperatorDetails.skill}`
                     : null
                 }
                 disabled={
                   activeOperator === null ||
                   activeOperator.rarity === 1 ||
-                  activeOperator.rarity === 2
+                  activeOperator.rarity === 2 ||
+                  operatorSkills?.length === 1
                 }
                 hasNullOption={true}
                 nullOptionText="N/A"

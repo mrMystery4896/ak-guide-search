@@ -35,9 +35,9 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
   return (
     <motion.div
       variants={guideCard}
-      className="relative flex w-full flex-col items-start overflow-hidden rounded-lg bg-gray-300 md:h-[180px] md:flex-row md:rounded-xl xl:h-[270px]"
+      className="relative flex w-full flex-col items-start overflow-hidden rounded-lg bg-gray-300 md:h-[180px] md:flex-row md:rounded-xl xl:h-[200px] 2xl:h-[270px]"
     >
-      <div className="relative min-w-full overflow-hidden pb-[56%] md:h-[180px] md:min-w-[320px] md:pb-0 xl:h-[270px] xl:min-w-[480px]">
+      <div className="relative min-w-full overflow-hidden pb-[56%] md:h-[180px] md:min-w-[320px] md:pb-0 xl:h-[200px] xl:min-w-[360px] 2xl:h-[270px] 2xl:min-w-[480px]">
         <Image
           src={`${env.NEXT_PUBLIC_GOOGLE_CLOUD_STORAGE_BASE_URL}/guide-thumbnail/${guide.id}.png`}
           alt={guide.title}
@@ -49,7 +49,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide }) => {
           priority={true}
         />
       </div>
-      <div className="flex min-h-fit w-auto max-w-full flex-col gap-4 p-4 md:h-[180px] md:w-auto md:max-w-[calc(100%-320px)] md:justify-between xl:h-[270px] xl:max-w-[calc(100%-480px)] xl:justify-start xl:gap-8 xl:p-6">
+      <div className="flex min-h-fit w-auto max-w-full flex-col gap-4 p-4 md:h-[180px] md:w-auto md:max-w-[calc(100%-320px)] md:justify-between xl:h-[200px] xl:max-w-[calc(100%-360px)] 2xl:h-[270px] 2xl:max-w-[calc(100%-480px)] 2xl:justify-start 2xl:gap-8 2xl:p-6">
         <div className="w-full">
           <h3 className="truncate text-xl font-bold xl:text-2xl">
             {guide.title}

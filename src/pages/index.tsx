@@ -3,6 +3,7 @@ import { motion, Variants } from "framer-motion";
 import GuideCard from "../components/GuideCard";
 import { Creator, Guide, GuideOperator, Operator, Tag } from "@prisma/client";
 import { prisma } from "../server/db/client";
+import Link from "next/link";
 
 interface HomeProps {
   recentGuides: (Guide & {
@@ -54,7 +55,13 @@ const Home: NextPage<HomeProps> = ({ recentGuides }) => {
         className="flex min-w-full flex-col gap-2 md:gap-4"
       >
         {recentGuides?.map((guide) => {
-          return <GuideCard guide={guide} key={guide.id} />;
+          return (
+            <motion.div key={guide.id} whileHover={{ y: -2 }}>
+              <Link href={`/guides/${guide.id}`}>
+                <GuideCard guide={guide} />
+              </Link>
+            </motion.div>
+          );
         })}
       </motion.div>
     </>
