@@ -1,4 +1,5 @@
 import type { EventWithChildren } from "./common-types";
+import { prisma } from "../server/db/client";
 
 export const translateRarityToClassName = (rarity: number) => {
   switch (rarity) {

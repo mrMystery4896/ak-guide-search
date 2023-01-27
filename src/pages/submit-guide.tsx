@@ -720,7 +720,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
 export default SubmitGuide;
 
 export const getStaticProps: GetStaticProps = async () => {
-  const operatorList = await prisma?.operator.findMany({
+  const operatorList = await prisma.operator.findMany({
     orderBy: [
       {
         rarity: "desc",
@@ -730,7 +730,7 @@ export const getStaticProps: GetStaticProps = async () => {
       },
     ],
   });
-  const tagList = await prisma?.tag.findMany({
+  const tagList = await prisma.tag.findMany({
     orderBy: {
       name: "asc",
     },
