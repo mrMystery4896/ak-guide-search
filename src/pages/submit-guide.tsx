@@ -1,7 +1,7 @@
 import { Operator, Stage, Tag } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { GetServerSideProps, type NextPage } from "next";
+import { GetStaticProps, type NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -11,6 +11,7 @@ import { HiArrowsUpDown } from "react-icons/hi2";
 import Button from "../components/Button";
 import Dropdown from "../components/Dropdown";
 import Input from "../components/Input";
+import LoadingSpinner from "../components/LoadingSpinner";
 import OperatorTable from "../components/OperatorTable";
 import SelectOperatorDropdown from "../components/SelectOperatorDropdown";
 import SelectStageMenu from "../components/SelectStageMenu";
@@ -18,7 +19,6 @@ import SelectTagDropdown from "../components/SelectTagDropdown";
 import TagCard from "../components/TagCard";
 import Toast from "../components/Toast";
 import Tooltip from "../components/Tooltip";
-import { getServerAuthSession } from "../server/common/get-server-auth-session";
 import { prisma } from "../server/db/client";
 import { EventWithChildren, OperatorWithDetails } from "../utils/common-types";
 import {
@@ -236,9 +236,12 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     },
   });
 
+  // if no user, redirect to home
   useEffect(() => {
-    console.log(activeOperatorDetails.skill);
-  }, [activeOperatorDetails.skill]);
+    if (!session.data) {
+      router.replace("/");
+    }
+  }, []);
 
   const {
     data: youtubeData,
@@ -349,6 +352,13 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     });
   };
 
+  if (!session.data)
+    return (
+      <div className="flex h-auto w-full items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+
   return (
     <>
       <h1 className="text-2xl font-bold">Submit Guide</h1>
@@ -403,7 +413,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
         >
           <OperatorTable
             selectedOperators={selectedOperators}
-            // setSelectedOperators={setSelectedOperators}
+            setSelectedOperators={setSelectedOperators}
           />
           <div className="relative z-20">
             <SelectOperatorDropdown
@@ -706,8 +716,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
 
 export default SubmitGuide;
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getServerAuthSession(ctx);
+export const getStaticProps: GetStaticProps = async () => {
   const operatorList = await prisma.operator.findMany({
     orderBy: [
       {
@@ -724,15 +733,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     },
   });
   const eventList = await getEvent();
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
 
   return {
     props: {
