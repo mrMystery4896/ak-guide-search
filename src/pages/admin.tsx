@@ -1,9 +1,9 @@
 import { Tab } from "@headlessui/react";
-import { Operator } from "@prisma/client";
-import { GetServerSideProps, NextPage } from "next";
+import type { Operator } from "@prisma/client";
+import type { GetServerSideProps, NextPage } from "next";
 import EventList from "../components/EditEventList";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
-import { EventWithChildren } from "../utils/common-types";
+import type { EventWithChildren } from "../utils/common-types";
 import { useMediaQuery } from "react-responsive";
 import React from "react";
 import { motion } from "framer-motion";
@@ -36,7 +36,7 @@ const TabItem = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const AdminPage: NextPage<AdminPageProps> = ({ operatorList, eventList }) => {
+const AdminPage: NextPage<AdminPageProps> = ({ eventList }) => {
   const isSmallScreen = useMediaQuery({ query: "(max-width: 768px)" });
 
   return (

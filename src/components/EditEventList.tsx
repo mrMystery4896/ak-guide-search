@@ -1,11 +1,11 @@
 import Button from "./Button";
-import { EventWithChildren } from "../utils/common-types";
+import type { EventWithChildren } from "../utils/common-types";
 import { useState } from "react";
 import React from "react";
 import AddEventModal from "./AddEventModal";
 import EventList from "./EventList";
 import AddStageModal from "./AddStageModal";
-import { Stage } from "@prisma/client";
+import type { Stage } from "@prisma/client";
 import EditModal from "./EditModal";
 import DeleteModal from "./DeleteModal";
 import MoveModal from "./MoveModal";

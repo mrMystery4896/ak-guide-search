@@ -1,4 +1,4 @@
-import { Stage, Event } from "@prisma/client";
+import type { Stage, Event } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";

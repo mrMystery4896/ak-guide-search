@@ -1,7 +1,8 @@
 import { Listbox } from "@headlessui/react";
-import { AnimatePresence, motion, Variants } from "framer-motion";
+import type { Variants } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { BsCheck } from "react-icons/bs";
 import { FaChevronDown } from "react-icons/fa";
 import { twMerge } from "tailwind-merge";
@@ -39,11 +40,11 @@ const Dropdown = <T extends number | string>({
 }: DropdownProps<T>) => {
   useEffect(() => {
     if (disabled) onChange(null);
-  }, [disabled]);
+  }, [disabled, onChange]);
 
   useEffect(() => {
     if (selected && !options.includes(selected)) onChange(options[0] ?? null);
-  }, [options]);
+  }, [options, onChange, selected]);
 
   return (
     <Listbox
@@ -63,7 +64,7 @@ const Dropdown = <T extends number | string>({
               className
             )}
           >
-            {({ value }) => (
+            {() => (
               <>
                 <p className={`${disabled ? "text-white/50" : ""} truncate`}>
                   {selected === null

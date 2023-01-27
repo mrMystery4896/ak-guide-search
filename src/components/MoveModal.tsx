@@ -1,10 +1,10 @@
 import { Dialog } from "@headlessui/react";
-import { Stage } from "@prisma/client";
+import type { Stage } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
-import { EventWithChildren } from "../utils/common-types";
+import type { EventWithChildren } from "../utils/common-types";
 import { trpc } from "../utils/trpc";
 import Button from "./Button";
 import LoadingSpinner from "./LoadingSpinner";
@@ -145,7 +145,7 @@ const MoveModal: React.FC<MoveModalProps> = ({ modalState, setModalState }) => {
         return;
       }
     }
-  }, [selectedEvent]);
+  }, [selectedEvent, modalState.event, modalState.stage]);
 
   return (
     <>

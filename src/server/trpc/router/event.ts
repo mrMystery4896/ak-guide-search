@@ -2,10 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { convertDateToUTCMinus7, getEvent } from "../../../utils/functions";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
-import { Event } from "@prisma/client";
+import type { Event } from "@prisma/client";
 
 export const eventRouter = router({
-  getEventList: publicProcedure.query(async ({ ctx }) => {
+  getEventList: publicProcedure.query(async () => {
     return await getEvent();
   }),
   addEvent: protectedProcedure

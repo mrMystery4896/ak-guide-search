@@ -1,7 +1,10 @@
-import { GetServerSideProps, type NextPage } from "next";
-import { motion, Variants } from "framer-motion";
+import type { GetServerSideProps } from "next";
+import { type NextPage } from "next";
+import type { Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import GuideCard from "../components/GuideCard";
-import { Creator, Guide, GuideOperator, Operator, Tag } from "@prisma/client";
+import type { Creator, Guide, GuideOperator, Tag } from "@prisma/client";
+// import { Operator } from "@prisma/client";
 import { prisma } from "../server/db/client";
 import Link from "next/link";
 

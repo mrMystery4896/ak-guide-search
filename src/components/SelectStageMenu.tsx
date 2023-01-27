@@ -1,8 +1,10 @@
 import { Menu } from "@headlessui/react";
-import { Stage } from "@prisma/client";
+import type { Stage } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
-import { EventWithChildren } from "../utils/common-types";
+import type { Dispatch, SetStateAction } from "react";
+import { useMemo } from "react";
+import { useEffect, useState } from "react";
+import type { EventWithChildren } from "../utils/common-types";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { BsCheck } from "react-icons/bs";
 
@@ -134,17 +136,20 @@ const SelectStageMenu: React.FC<SelectStageMenuProps> = ({
   onChange,
   initialEventStack = [],
 }) => {
-  const rootEvent = {
-    id: "",
-    name: "",
-    startDate: null,
-    endDate: null,
-    description: null,
-    parentEventId: null,
-    childEvents: eventList,
-    parentEvent: null,
-    stages: [] as Stage[],
-  };
+  // the root event object makes the dependencies of useeffect hook change on every render, so we need to memoize it
+  const rootEvent = useMemo(() => {
+    return {
+      id: "",
+      name: "",
+      startDate: null,
+      endDate: null,
+      description: null,
+      parentEventId: null,
+      childEvents: eventList,
+      parentEvent: null,
+      stages: [] as Stage[],
+    };
+  }, [eventList]);
   const [menuEventIdStack, setMenuEventIdStack] =
     useState<string[]>(initialEventStack);
   const [currentSelectedEvent, setCurrentSelectedEvent] =
@@ -164,11 +169,11 @@ const SelectStageMenu: React.FC<SelectStageMenuProps> = ({
       );
     }
     currentEvent && setCurrentSelectedEvent(currentEvent);
-  }, [menuEventIdStack]);
+  }, [menuEventIdStack, rootEvent]);
 
   useEffect(() => {
     onChange && onChange(currentSelectedEvent);
-  }, [currentSelectedEvent]);
+  }, [currentSelectedEvent, onChange]);
 
   return (
     <AnimatePresence>

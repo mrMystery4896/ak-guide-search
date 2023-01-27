@@ -1,10 +1,10 @@
-import { Creator, Guide, GuideOperator, Operator, Tag } from "@prisma/client";
+import type { Creator, Guide, GuideOperator, Tag } from "@prisma/client";
 import Image from "next/image";
 import { env } from "../env/client.mjs";
 import TagCard from "./TagCard";
 import { translateRarityToClassName } from "../utils/functions";
-import { motion, Variants } from "framer-motion";
-import { useMediaQuery } from "react-responsive";
+import type { Variants } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface GuideCardProps {
   guide: Guide & {

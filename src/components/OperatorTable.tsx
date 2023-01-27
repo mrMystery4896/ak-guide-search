@@ -1,5 +1,5 @@
 import { env } from "../env/client.mjs";
-import { OperatorWithDetails } from "../utils/common-types";
+import type { OperatorWithDetails } from "../utils/common-types";
 import {
   formatEliteLevel,
   formatModule,

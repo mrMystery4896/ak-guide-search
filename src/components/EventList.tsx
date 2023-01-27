@@ -1,13 +1,14 @@
 import { Disclosure, Menu } from "@headlessui/react";
-import { Variants, motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import React, { useEffect } from "react";
-import { Dispatch, SetStateAction } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { FaChevronDown } from "react-icons/fa";
-import { EventWithChildren } from "../utils/common-types";
+import type { EventWithChildren } from "../utils/common-types";
 import { RiMenuAddFill } from "react-icons/ri";
 import { BsFillTrashFill, BsThreeDotsVertical } from "react-icons/bs";
 import { MdModeEdit } from "react-icons/md";
-import { Stage } from "@prisma/client";
+import type { Stage } from "@prisma/client";
 import { TiPlus } from "react-icons/ti";
 import { BiMove } from "react-icons/bi";
 
@@ -75,6 +76,7 @@ const EventList: React.FC<EventListProps> = ({
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // eslint-disable-next-line
       const eventContainers: any = document.querySelectorAll("#eventContainer");
       for (let i = 0; i < eventContainers.length; i++) {
         if (eventContainers[i]) {

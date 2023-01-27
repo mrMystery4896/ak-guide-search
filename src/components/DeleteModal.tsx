@@ -1,9 +1,9 @@
 import { Dialog } from "@headlessui/react";
-import { Stage } from "@prisma/client";
+import type { Stage } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
-import { EventWithChildren } from "../utils/common-types";
+import type { EventWithChildren } from "../utils/common-types";
 import { trpc } from "../utils/trpc";
 import Button from "./Button";
 import Toast from "./Toast";
@@ -136,7 +136,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
                       deleteStage(modalState.stage.id);
                     } else if (modalState.event !== undefined) {
                       //flatten the event object
-                      let events: EventWithChildren[] = [];
+                      const events: EventWithChildren[] = [];
                       const flattenEvents = (event: EventWithChildren) => {
                         events.push(event);
                         if (event.childEvents)

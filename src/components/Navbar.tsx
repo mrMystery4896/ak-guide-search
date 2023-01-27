@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React from "react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import type { useSession } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import Button from "./Button";
 import Input from "./Input";
 import LoadingSpinner from "./LoadingSpinner";

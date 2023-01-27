@@ -1,11 +1,10 @@
 import { Dialog } from "@headlessui/react";
-import { Stage } from "@prisma/client";
+import type { Stage } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
-import { router } from "../server/trpc/trpc";
-import { EventWithChildren } from "../utils/common-types";
+import type { EventWithChildren } from "../utils/common-types";
 import {
   convertDateToUTCMinus7,
   convertDateToUTCMinus7String,

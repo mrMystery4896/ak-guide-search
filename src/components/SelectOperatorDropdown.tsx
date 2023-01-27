@@ -1,4 +1,4 @@
-import { Operator } from "@prisma/client";
+import type { Operator } from "@prisma/client";
 import { Combobox } from "@headlessui/react";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -48,7 +48,7 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
         return operator.name.toLowerCase().startsWith(query.toLowerCase());
       })
     );
-  }, [query]);
+  }, [query, operators]);
 
   useEffect(() => {
     if (!open) {
@@ -61,7 +61,7 @@ const DropdownOptions: React.FC<DropdownOptionsProps> = ({
         listRef.current?.scrollToItem(index, "center");
       }
     }
-  }, [open]);
+  }, [open, activeOperator, listRef, operators, setQuery]);
 
   return (
     <AnimatePresence>

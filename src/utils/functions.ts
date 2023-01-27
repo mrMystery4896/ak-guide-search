@@ -1,4 +1,4 @@
-import { EventWithChildren } from "./common-types";
+import type { EventWithChildren } from "./common-types";
 
 export const translateRarityToClassName = (rarity: number) => {
   switch (rarity) {

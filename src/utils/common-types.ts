@@ -1,4 +1,4 @@
-import { Event, Operator, Stage, GuideOperator } from "@prisma/client";
+import type { Event, Operator, Stage, GuideOperator } from "@prisma/client";
 
 export type EventWithChildren = Event & {
   stages: Stage[];

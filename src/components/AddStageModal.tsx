@@ -1,12 +1,7 @@
 import { Dialog } from "@headlessui/react";
-import {
-  AnimatePresence,
-  motion,
-  MotionAdvancedProps,
-  Reorder,
-} from "framer-motion";
+import { AnimatePresence, motion, Reorder } from "framer-motion";
 import { useRef, useState } from "react";
-import { EventWithChildren } from "../utils/common-types";
+import type { EventWithChildren } from "../utils/common-types";
 import Button from "./Button";
 import Input from "./Input";
 import { TiMinus, TiPlus } from "react-icons/ti";

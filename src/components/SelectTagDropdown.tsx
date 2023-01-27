@@ -1,5 +1,5 @@
 import { Combobox } from "@headlessui/react";
-import { Tag } from "@prisma/client";
+import type { Tag } from "@prisma/client";
 import { AnimatePresence, motion } from "framer-motion";
 import React from "react";
 import { useEffect, useState } from "react";
@@ -32,7 +32,7 @@ const SelectTagDropdown: React.FC<SelectTagDropdownProps> = ({
       setSelectedTagId("");
       setQuery("");
     }
-  }, [selectedTagId]);
+  }, [selectedTagId, setSelectedTags, tags]);
 
   return (
     <>

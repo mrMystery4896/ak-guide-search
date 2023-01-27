@@ -1,10 +1,10 @@
-import { Guide, Stage, Tag, Creator } from "@prisma/client";
-import { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import { User } from "next-auth";
+import type { Guide, Stage, Tag, Creator } from "@prisma/client";
+import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
+import type { User } from "next-auth";
 import Button from "../../components/Button";
 import OperatorTable from "../../components/OperatorTable";
 import { prisma } from "../../server/db/client";
-import { OperatorWithDetails } from "../../utils/common-types";
+import type { OperatorWithDetails } from "../../utils/common-types";
 import { AiFillYoutube } from "react-icons/ai";
 import { IoFlag } from "react-icons/io5";
 import { useRouter } from "next/router";
@@ -20,7 +20,7 @@ interface GuidePageProps {
   guide: GuideWithDetails;
 }
 
-const guidePage: NextPage<GuidePageProps> = ({ guide }) => {
+const GuidePage: NextPage<GuidePageProps> = ({ guide }) => {
   const router = useRouter();
 
   return (
@@ -86,7 +86,7 @@ const guidePage: NextPage<GuidePageProps> = ({ guide }) => {
   );
 };
 
-export default guidePage;
+export default GuidePage;
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const guides = await prisma?.guide.findMany();

@@ -1,7 +1,7 @@
-import { Operator, Stage, Tag } from "@prisma/client";
+import type { Operator, Stage, Tag } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { GetStaticProps, type NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -20,7 +20,10 @@ import TagCard from "../components/TagCard";
 import Toast from "../components/Toast";
 import Tooltip from "../components/Tooltip";
 import { prisma } from "../server/db/client";
-import { EventWithChildren, OperatorWithDetails } from "../utils/common-types";
+import type {
+  EventWithChildren,
+  OperatorWithDetails,
+} from "../utils/common-types";
 import {
   getEliteBasedOnRarity,
   calculateMaxLevel,
@@ -241,7 +244,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     if (!session.data) {
       router.replace("/");
     }
-  }, []);
+  }, [router, session.data]);
 
   const {
     data: youtubeData,
