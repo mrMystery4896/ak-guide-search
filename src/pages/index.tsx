@@ -1,26 +1,11 @@
-import type { GetServerSideProps } from "next";
+import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { type NextPage } from "next";
 import type { Variants } from "framer-motion";
 import { motion } from "framer-motion";
 import GuideCard from "../components/GuideCard";
 import type { Creator, Guide, GuideOperator, Tag } from "@prisma/client";
-// import { Operator } from "@prisma/client";
 import { prisma } from "../server/db/client";
 import Link from "next/link";
-
-interface HomeProps {
-  recentGuides: (Guide & {
-    guideOperator: (GuideOperator & {
-      operator: {
-        id: string;
-        name: string;
-        rarity: number;
-      };
-    })[];
-    tags: Tag[];
-    uploadedBy: Creator;
-  })[];
-}
 
 const guideCards: Variants = {
   visible: {
@@ -41,7 +26,9 @@ const guideCards: Variants = {
   },
 };
 
-const Home: NextPage<HomeProps> = ({ recentGuides }) => {
+const Home: NextPage<
+  InferGetServerSidePropsType<typeof getServerSideProps>
+> = ({ recentGuides }) => {
   return (
     <>
       <motion.h2
@@ -73,7 +60,23 @@ const Home: NextPage<HomeProps> = ({ recentGuides }) => {
 
 export default Home;
 
-export const getServerSideProps: GetServerSideProps = async () => {
+interface RecentGuides {
+  recentGuides: (Guide & {
+    guideOperator: (GuideOperator & {
+      operator: {
+        id: string;
+        name: string;
+        rarity: number;
+      };
+    })[];
+    tags: Tag[];
+    uploadedBy: Creator;
+  })[];
+}
+
+export const getServerSideProps: GetServerSideProps<
+  RecentGuides
+> = async () => {
   const data = await prisma.guide.findMany({
     include: {
       guideOperator: {
@@ -101,7 +104,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
 
   return {
     props: {
-      recentGuides: JSON.parse(JSON.stringify(data)),
+      recentGuides: JSON.parse(JSON.stringify(data)) as typeof data,
     },
   };
 };

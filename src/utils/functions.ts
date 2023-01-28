@@ -1,5 +1,4 @@
 import type { EventWithChildren } from "./common-types";
-import { prisma } from "../server/db/client";
 
 export const translateRarityToClassName = (rarity: number) => {
   switch (rarity) {
@@ -42,7 +41,8 @@ export const convertDateToUTCMinus7String = (
 };
 
 export const getEvent = async () => {
-  const eventList = await prisma?.event.findMany({
+  const { prisma } = await import("../server/db/client");
+  const eventList = await prisma.event.findMany({
     include: {
       stages: {
         orderBy: {
