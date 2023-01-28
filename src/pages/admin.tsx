@@ -8,6 +8,7 @@ import { useMediaQuery } from "react-responsive";
 import React from "react";
 import { motion } from "framer-motion";
 import { getEvent } from "../utils/functions";
+import { prisma } from "../server/db/client";
 
 interface AdminPageProps {
   operatorList: Operator[];
@@ -88,7 +89,7 @@ export default AdminPage;
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getServerAuthSession(ctx);
-  const operatorList = await prisma?.operator.findMany({
+  const operatorList = await prisma.operator.findMany({
     orderBy: [
       {
         rarity: "desc",
