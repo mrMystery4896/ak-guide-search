@@ -1,14 +1,14 @@
 import { Tab } from "@headlessui/react";
 import type { Operator } from "@prisma/client";
+import { motion } from "framer-motion";
 import type { GetServerSideProps, NextPage } from "next";
+import React from "react";
+import { useMediaQuery } from "react-responsive";
 import EventList from "../components/EditEventList";
 import { getServerAuthSession } from "../server/common/get-server-auth-session";
-import type { EventWithChildren } from "../utils/common-types";
-import { useMediaQuery } from "react-responsive";
-import React from "react";
-import { motion } from "framer-motion";
-import { getEvent } from "../utils/functions";
 import { prisma } from "../server/db/client";
+import type { EventWithChildren } from "../utils/common-types";
+import { getEvent } from "../utils/functions";
 
 interface AdminPageProps {
   operatorList: Operator[];

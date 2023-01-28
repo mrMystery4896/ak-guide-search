@@ -239,6 +239,58 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     },
   });
 
+  const handleOperatorEliteChange = (v: string | null) => {
+    setActiveOperatorDetails({
+      ...activeOperatorDetails,
+      elite: v === null ? null : parseInt(v.charAt(v.length - 1)),
+    });
+  };
+
+  const handleOperatorSkillChange = (v: string | null) => {
+    setActiveOperatorDetails({
+      ...activeOperatorDetails,
+      skill: v === null ? null : parseInt(v.charAt(v.length - 1)),
+    });
+  };
+
+  const handleOperatorSkillLevelChange = (v: string | null) => {
+    if (v === null) {
+      setActiveOperatorDetails({
+        ...activeOperatorDetails,
+        skillLevel: null,
+        mastery: null,
+      });
+      return;
+    }
+    if (v.charAt(0) === "L") {
+      setActiveOperatorDetails({
+        ...activeOperatorDetails,
+        skillLevel: parseInt(v.charAt(v.length - 1)),
+        mastery: 0,
+      });
+      return;
+    }
+    setActiveOperatorDetails({
+      ...activeOperatorDetails,
+      skillLevel: 7,
+      mastery: parseInt(v.charAt(v.length - 1)),
+    });
+  };
+
+  const handleOperatorModuleChange = (v: "X" | "Y" | "None" | null) => {
+    setActiveOperatorDetails({
+      ...activeOperatorDetails,
+      moduleType: v,
+    });
+  };
+
+  const handleOperatorModuleLevelChange = (v: number | null) => {
+    setActiveOperatorDetails({
+      ...activeOperatorDetails,
+      moduleLevel: v,
+    });
+  };
+
   // if no user, redirect to home
   useEffect(() => {
     if (!session.data) {
@@ -442,12 +494,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                     return `Elite ${elite}`;
                   }) || []
                 }
-                onChange={(v) => {
-                  setActiveOperatorDetails({
-                    ...activeOperatorDetails,
-                    elite: v === null ? null : parseInt(v.charAt(v.length - 1)),
-                  });
-                }}
+                onChange={handleOperatorEliteChange}
                 selected={
                   activeOperatorDetails.elite !== null
                     ? `Elite ${activeOperatorDetails.elite}`
@@ -502,12 +549,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                     return `Skill ${skill}`;
                   }) || []
                 }
-                onChange={(v) => {
-                  setActiveOperatorDetails({
-                    ...activeOperatorDetails,
-                    skill: v === null ? null : parseInt(v.charAt(v.length - 1)),
-                  });
-                }}
+                onChange={handleOperatorSkillChange}
                 selected={
                   activeOperatorDetails.skill !== null ||
                   operatorSkills?.length === 0
@@ -544,29 +586,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                     )
                     .filter((level) => level !== "M0") || []
                 }
-                onChange={(v) => {
-                  if (v === null) {
-                    setActiveOperatorDetails({
-                      ...activeOperatorDetails,
-                      skillLevel: null,
-                      mastery: null,
-                    });
-                    return;
-                  }
-                  if (v.charAt(0) === "L") {
-                    setActiveOperatorDetails({
-                      ...activeOperatorDetails,
-                      skillLevel: parseInt(v.charAt(v.length - 1)),
-                      mastery: 0,
-                    });
-                    return;
-                  }
-                  setActiveOperatorDetails({
-                    ...activeOperatorDetails,
-                    skillLevel: 7,
-                    mastery: parseInt(v.charAt(v.length - 1)),
-                  });
-                }}
+                onChange={handleOperatorSkillLevelChange}
                 selected={
                   activeOperatorDetails.skillLevel !== null
                     ? activeOperatorDetails.mastery
@@ -593,12 +613,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
               </div>
               <Dropdown
                 options={operatorModules ?? []}
-                onChange={(v) => {
-                  setActiveOperatorDetails({
-                    ...activeOperatorDetails,
-                    moduleType: v,
-                  });
-                }}
+                onChange={handleOperatorModuleChange}
                 selected={activeOperatorDetails.moduleType ?? null}
                 disabled={
                   activeOperator === null ||
@@ -622,12 +637,7 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
               </div>
               <Dropdown
                 options={[1, 2, 3]}
-                onChange={(v) => {
-                  setActiveOperatorDetails({
-                    ...activeOperatorDetails,
-                    moduleLevel: v,
-                  });
-                }}
+                onChange={handleOperatorModuleLevelChange}
                 selected={activeOperatorDetails.moduleLevel}
                 disabled={
                   activeOperator === null ||
@@ -743,5 +753,6 @@ export const getStaticProps: GetStaticProps = async () => {
       tagList,
       eventList: JSON.parse(JSON.stringify(eventList)),
     },
+    revalidate: 60,
   };
 };

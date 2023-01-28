@@ -1,4 +1,4 @@
-import type { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import type { GetServerSideProps } from "next";
 import { type NextPage } from "next";
 import type { Variants } from "framer-motion";
 import { motion } from "framer-motion";
@@ -26,9 +26,7 @@ const guideCards: Variants = {
   },
 };
 
-const Home: NextPage<
-  InferGetServerSidePropsType<typeof getServerSideProps>
-> = ({ recentGuides }) => {
+const Home: NextPage<RecentGuides> = ({ recentGuides }) => {
   return (
     <>
       <motion.h2
@@ -74,9 +72,7 @@ interface RecentGuides {
   })[];
 }
 
-export const getServerSideProps: GetServerSideProps<
-  RecentGuides
-> = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const data = await prisma.guide.findMany({
     include: {
       guideOperator: {

@@ -31,27 +31,32 @@ const chevronVariants: Variants = {
 const Dropdown = <T extends number | string>({
   options,
   selected,
-  onChange,
+  onChange: onChangeHandler,
   disabled = false,
   hasNullOption = false,
   nullOptionText = "N/A",
   className = "",
   optionsClassName = "",
 }: DropdownProps<T>) => {
+  // if the component is disabled, set the selected option to null
   useEffect(() => {
-    if (disabled) onChange(null);
-  }, [disabled, onChange]);
+    if (disabled) onChangeHandler(null);
+    // onChangeHandler cannot be added to the dependency array because it will cause an infinite loop, usecallback does not work
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [disabled]); //
 
+  // If the selected option is not in the options array, set the selected option to the first option in the array (or null if there are no options)
   useEffect(() => {
-    if (selected && !options.includes(selected)) onChange(options[0] ?? null);
-  }, [options, onChange, selected]);
+    if (selected && !options.includes(selected))
+      onChangeHandler(options[0] ?? null);
+  }, [options, selected, onChangeHandler]);
 
   return (
     <Listbox
       as="div"
       className="relative"
       value={selected}
-      onChange={onChange}
+      onChange={onChangeHandler}
       disabled={disabled}
     >
       {({ disabled, open }) => (
