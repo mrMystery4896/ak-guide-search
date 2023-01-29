@@ -621,11 +621,9 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
                   activeOperatorDetails.elite < 2
                 }
                 hasNullOption={
-                  !!(
-                    (activeOperatorDetails.elite &&
-                      activeOperatorDetails.elite >= 2) ||
-                    activeOperator === null
-                  )
+                  (activeOperatorDetails.elite !== null &&
+                    activeOperatorDetails.elite >= 2) ||
+                  activeOperator === null
                 }
                 nullOptionText="N/A"
                 className="w-full md:w-32 md:max-w-full"

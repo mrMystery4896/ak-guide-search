@@ -1,30 +1,35 @@
-import type { Guide, Stage, Tag, Creator } from "@prisma/client";
 import type { GetStaticPaths, GetStaticProps, NextPage } from "next";
-import type { User } from "next-auth";
 import Button from "../../components/Button";
 import OperatorTable from "../../components/OperatorTable";
 import { prisma } from "../../server/db/client";
-import type { OperatorWithDetails } from "../../utils/common-types";
+import type {
+  OperatorWithDetails,
+  GuideWithDetails,
+} from "../../utils/common-types";
 import { AiFillYoutube } from "react-icons/ai";
 import { IoFlag } from "react-icons/io5";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
+import { MdModeEdit } from "react-icons/md";
+import { useState } from "react";
+import EditGuideModal from "../../components/EditGuideModal";
 
-type GuideWithDetails = Guide & {
-  stage: Stage;
-  guideOperator: OperatorWithDetails[];
-  tags: Tag[];
-  submittedBy: User;
-  uploadedBy: Creator;
-};
 interface GuidePageProps {
   guide: GuideWithDetails;
 }
 
 const GuidePage: NextPage<GuidePageProps> = ({ guide }) => {
   const router = useRouter();
+  const session = useSession();
+  const [editGuideModalOpen, setEditGuideModalOpen] = useState(false);
 
   return (
     <>
+      <EditGuideModal
+        isOpen={editGuideModalOpen}
+        setIsOpen={setEditGuideModalOpen}
+        guide={guide}
+      />
       <h1 className="mt-4 truncate text-3xl font-bold">{guide.title}</h1>
       <div className="mt-4 flex flex-col gap-4 md:flex-row xl:gap-8">
         <div className="w-full md:w-96">
@@ -57,7 +62,7 @@ const GuidePage: NextPage<GuidePageProps> = ({ guide }) => {
               {guide.stage.stageName}
             </p>
           </div>
-          <div className="mt-4 flex gap-4 lg:gap-6">
+          <div className="mt-4 flex gap-4">
             <Button
               onClick={() =>
                 window.open(
@@ -71,12 +76,26 @@ const GuidePage: NextPage<GuidePageProps> = ({ guide }) => {
                 YouTube
               </div>
             </Button>
-            <Button onClick={() => router.push("/report")} className="bg-red">
-              <div className="flex items-center gap-2">
-                <IoFlag className="h-5 w-5" />
-                Report
-              </div>
-            </Button>
+            {session.data?.user ? (
+              session.data.user.role === "USER" ? (
+                <Button
+                  onClick={() => router.push("/report")}
+                  className="bg-red"
+                >
+                  <div className="flex items-center gap-2">
+                    <IoFlag className="h-5 w-5" />
+                    Report
+                  </div>
+                </Button>
+              ) : (
+                <Button onClick={() => setEditGuideModalOpen(true)}>
+                  <div className="flex items-center gap-2">
+                    <MdModeEdit className="h-5 w-5" />
+                    Edit
+                  </div>
+                </Button>
+              )
+            ) : null}
           </div>
         </div>
       </div>

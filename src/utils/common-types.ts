@@ -1,4 +1,13 @@
-import type { Event, Operator, Stage, GuideOperator } from "@prisma/client";
+import type {
+  Event,
+  Operator,
+  Stage,
+  GuideOperator,
+  Creator,
+  Guide,
+  Tag,
+  User,
+} from "@prisma/client";
 
 export type EventWithChildren = Event & {
   stages: Stage[];
@@ -8,3 +17,11 @@ export type EventWithChildren = Event & {
 
 export type OperatorWithDetails = Operator &
   Omit<GuideOperator, "operatorId" | "guideId">;
+
+export type GuideWithDetails = Guide & {
+  stage: Stage;
+  guideOperator: OperatorWithDetails[];
+  tags: Tag[];
+  submittedBy: User;
+  uploadedBy: Creator;
+};
