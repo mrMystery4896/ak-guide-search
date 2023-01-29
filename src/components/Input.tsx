@@ -7,7 +7,6 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   inputDivClassName?: string;
 }
 
-// eslint-disable-next-line react/display-name
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
   (
     {
@@ -67,4 +66,5 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
+Input.displayName = "Input";
 export default Input;

@@ -11,7 +11,7 @@ import { IoFlag } from "react-icons/io5";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { MdModeEdit } from "react-icons/md";
-import { useState } from "react";
+import { useModal } from "../../stores/modalStore";
 import EditGuideModal from "../../components/EditGuideModal";
 
 interface GuidePageProps {
@@ -21,15 +21,10 @@ interface GuidePageProps {
 const GuidePage: NextPage<GuidePageProps> = ({ guide }) => {
   const router = useRouter();
   const session = useSession();
-  const [editGuideModalOpen, setEditGuideModalOpen] = useState(false);
+  const modal = useModal();
 
   return (
     <>
-      <EditGuideModal
-        isOpen={editGuideModalOpen}
-        setIsOpen={setEditGuideModalOpen}
-        guide={guide}
-      />
       <h1 className="mt-4 truncate text-3xl font-bold">{guide.title}</h1>
       <div className="mt-4 flex flex-col gap-4 md:flex-row xl:gap-8">
         <div className="w-full md:w-96">
@@ -88,7 +83,14 @@ const GuidePage: NextPage<GuidePageProps> = ({ guide }) => {
                   </div>
                 </Button>
               ) : (
-                <Button onClick={() => setEditGuideModalOpen(true)}>
+                <Button
+                  onClick={() =>
+                    modal.open({
+                      title: `Edit ${guide.title}`,
+                      children: <EditGuideModal guide={guide} />,
+                    })
+                  }
+                >
                   <div className="flex items-center gap-2">
                     <MdModeEdit className="h-5 w-5" />
                     Edit

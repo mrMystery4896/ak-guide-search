@@ -1,9 +1,8 @@
-import { Dialog } from "@headlessui/react";
 import type { Stage } from "@prisma/client";
-import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/router";
 import React, { useRef, useState } from "react";
 import { toast } from "react-hot-toast";
+import { useModal } from "../stores/modalStore";
 import type { EventWithChildren } from "../utils/common-types";
 import {
   convertDateToUTCMinus7,
@@ -13,22 +12,14 @@ import { trpc } from "../utils/trpc";
 import Button from "./Button";
 import Input from "./Input";
 import Toast from "./Toast";
-
-type EditModalState = {
-  open: boolean;
-  event?: EventWithChildren;
-  stage?: Stage;
-};
-
 interface EditModalProps {
-  modalState: EditModalState;
-  setModalState: React.Dispatch<React.SetStateAction<EditModalState>>;
+  event: EventWithChildren;
+  stage?: Stage;
 }
 
 const EditEventForm: React.FC<{
   event: EventWithChildren;
-  setModalState: React.Dispatch<React.SetStateAction<EditModalState>>;
-}> = ({ event, setModalState }) => {
+}> = ({ event }) => {
   const emptyErrorState = {
     name: "",
     startDate: "",
@@ -36,6 +27,7 @@ const EditEventForm: React.FC<{
   };
 
   const router = useRouter();
+  const modal = useModal();
 
   const [hasDuration, setHasDuration] = useState(
     event.startDate !== null || event.endDate !== null
@@ -61,7 +53,7 @@ const EditEventForm: React.FC<{
           duration={3000}
         />
       ));
-      setModalState({ open: false, event: undefined, stage: undefined });
+      modal.close();
       router.replace(router.asPath);
     },
     onError: (error) => {
@@ -300,8 +292,7 @@ const EditEventForm: React.FC<{
 
 const EditStageForm: React.FC<{
   stage: Stage;
-  setModalState: React.Dispatch<React.SetStateAction<EditModalState>>;
-}> = ({ stage, setModalState }) => {
+}> = ({ stage }) => {
   const defaultError = {
     stageCode: "",
     stageName: "",
@@ -310,6 +301,7 @@ const EditStageForm: React.FC<{
   const [newStage, setNewStage] = useState(stage);
   const [error, setError] = useState(defaultError);
   const router = useRouter();
+  const modal = useModal();
 
   const { mutate, isLoading } = trpc.stage.editStage.useMutation({
     onSuccess: () => {
@@ -322,7 +314,7 @@ const EditStageForm: React.FC<{
           duration={t.duration}
         />
       ));
-      setModalState({ open: false, event: undefined, stage: undefined });
+      modal.close();
       router.replace(router.asPath);
     },
     onError: (error) => {
@@ -391,59 +383,14 @@ const EditStageForm: React.FC<{
   );
 };
 
-const EditModal: React.FC<EditModalProps> = ({ modalState, setModalState }) => {
+const EditModal: React.FC<EditModalProps> = ({ event, stage }) => {
   return (
     <>
-      <AnimatePresence>
-        {modalState.open && modalState.event && (
-          <Dialog
-            open={modalState.open}
-            onClose={() => {
-              setModalState({
-                open: false,
-                event: undefined,
-                stage: undefined,
-              });
-            }}
-            static
-          >
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50"
-            />
-            <div className="absolute inset-0 flex min-h-screen items-center justify-center">
-              <Dialog.Panel
-                as={motion.div}
-                key="modal"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2 }}
-                className="m-auto max-h-[80%] w-96 max-w-[80%] overflow-y-scroll rounded-md bg-gray-400 p-4 md:rounded-lg"
-              >
-                <Dialog.Title className="mb-4 text-xl font-bold">
-                  Edit {modalState.stage?.stageName ?? modalState.event.name}
-                </Dialog.Title>
-                {modalState.stage ? (
-                  <EditStageForm
-                    stage={modalState.stage}
-                    setModalState={setModalState}
-                  />
-                ) : (
-                  <EditEventForm
-                    event={modalState.event}
-                    setModalState={setModalState}
-                  />
-                )}
-              </Dialog.Panel>
-            </div>
-          </Dialog>
-        )}
-      </AnimatePresence>
+      {stage ? (
+        <EditStageForm stage={stage} />
+      ) : (
+        <EditEventForm event={event} />
+      )}
     </>
   );
 };

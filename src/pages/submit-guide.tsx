@@ -69,8 +69,10 @@ const SubmitGuide: NextPage<SubmitGuideProps> = ({
     ...activeOperator,
     ...activeOperatorDetails,
   });
+
   const session = useSession();
   const router = useRouter();
+
   const { data: operatorElite } = useQuery(
     ["calculate-operator-elite", activeOperator],
     {

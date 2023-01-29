@@ -1,5 +1,3 @@
-import { Dialog } from "@headlessui/react";
-import { AnimatePresence, motion } from "framer-motion";
 import Input from "./Input";
 import Button from "./Button";
 import { useRef, useState } from "react";
@@ -8,26 +6,13 @@ import { trpc } from "../utils/trpc";
 import Toast from "./Toast";
 import { useRouter } from "next/router";
 import { convertDateToUTCMinus7String } from "../utils/functions";
+import { useModal } from "../stores/modalStore";
 
 interface AddEventModalProps {
-  modalState: {
-    open: boolean;
-    title: string;
-    parentEventId: string;
-  };
-  setModalState: React.Dispatch<
-    React.SetStateAction<{
-      open: boolean;
-      title: string;
-      parentEventId: string;
-    }>
-  >;
+  parentEventId: string;
 }
 
-const AddEventModal: React.FC<AddEventModalProps> = ({
-  modalState,
-  setModalState,
-}) => {
+const AddEventModal: React.FC<AddEventModalProps> = ({ parentEventId }) => {
   const emptyErrorState = {
     name: "",
     startDate: "",
@@ -35,6 +20,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
   };
 
   const router = useRouter();
+  const modal = useModal();
 
   const [hasDuration, setHasDuration] = useState(false);
   const [errors, setErrors] = useState(emptyErrorState);
@@ -50,7 +36,7 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
 
   const { mutate, isLoading } = trpc.event.addEvent.useMutation({
     onSuccess: () => {
-      setModalState({ open: false, title: "", parentEventId: "" });
+      modal.close();
       toast.custom((t) => (
         <Toast
           message="A new category has been added"
@@ -150,192 +136,131 @@ const AddEventModal: React.FC<AddEventModalProps> = ({
               eventEndDateYearInputRef.current?.value
             )
           : null,
-        parentEventId: modalState.parentEventId || null,
+        parentEventId: parentEventId || null,
       });
     }
   };
 
   return (
     <>
-      <AnimatePresence>
-        {modalState.open && (
-          <Dialog
-            open={modalState.open}
-            onClose={() => {
-              setModalState({ open: false, title: "", parentEventId: "" });
+      <form onSubmit={handleAddCategory}>
+        <div className="mt-2" />
+        <Input
+          ref={categoryNameInputRef}
+          id="categoryName"
+          label="Category Name"
+          placeholder="Category Name"
+          errorMessage={errors.name}
+        />
+        <label className="text-sm text-slate-200" htmlFor="description">
+          Description
+        </label>
+        <textarea
+          ref={categoryDescriptionInputRef}
+          rows={3}
+          id="description"
+          placeholder="Description"
+          className="mt-2 mb-2 w-full resize-none rounded-md border-2 border-gray-300 bg-gray-300 p-2 placeholder:text-gray-100 focus:border-primary focus:outline-none"
+        />
+        <div className="mt-2 flex flex-row items-center">
+          <input
+            type="checkbox"
+            checked={hasDuration}
+            onChange={(e) => {
+              setHasDuration(e.target.checked);
             }}
-            initialFocus={categoryNameInputRef}
-            static
+            className="h-3 w-3 rounded text-primary"
+            id="hasDuration"
+          />
+          <label
+            htmlFor="hasDuration"
+            className="m-auto ml-2 align-bottom text-sm"
           >
-            <motion.div
-              key="backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50"
-            />
-            <div className="absolute inset-0 flex min-h-screen items-center justify-center">
-              <Dialog.Panel
-                as={motion.div}
-                key="modal"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2 }}
-                className="m-auto max-h-[80%] w-96 max-w-[80%] overflow-y-scroll rounded-md bg-gray-400 p-4 md:rounded-lg"
+            Has Start/End Date
+          </label>
+        </div>
+        {hasDuration && (
+          <>
+            <label className="text-sm text-slate-200" htmlFor="startDateDay">
+              Start Date (UTC -7)
+            </label>
+            <div className="relative flex justify-start gap-2">
+              <Input
+                ref={eventStartDateDayInputRef}
+                placeholder="DD"
+                id="startDateDay"
+                inputDivClassName="w-1/5"
+                type="number"
+                className={
+                  errors.startDate ? "border-red focus:border-red" : ""
+                }
+              />
+              <Input
+                ref={eventStartDateMonthInputRef}
+                placeholder="MM"
+                inputDivClassName="w-1/5"
+                type="number"
+                className={
+                  errors.startDate ? "border-red focus:border-red" : ""
+                }
+              />
+              <Input
+                ref={eventStartDateYearInputRef}
+                placeholder="YYYY"
+                inputDivClassName="w-2/5"
+                type="number"
+                className={
+                  errors.startDate ? "border-red focus:border-red" : ""
+                }
+              />
+              <span
+                className={`absolute -bottom-1 h-5 text-sm font-semibold text-red ${
+                  errors.startDate ? "" : "invisible"
+                }`}
               >
-                <Dialog.Title className="mb-4 text-xl font-bold">
-                  {modalState.title}
-                </Dialog.Title>
-                <form onSubmit={handleAddCategory}>
-                  <div className="mt-2" />
-                  <Input
-                    ref={categoryNameInputRef}
-                    id="categoryName"
-                    label="Category Name"
-                    placeholder="Category Name"
-                    errorMessage={errors.name}
-                  />
-                  <label
-                    className="text-sm text-slate-200"
-                    htmlFor="description"
-                  >
-                    Description
-                  </label>
-                  <textarea
-                    ref={categoryDescriptionInputRef}
-                    rows={3}
-                    id="description"
-                    placeholder="Description"
-                    className="mt-2 mb-2 w-full resize-none rounded-md border-2 border-gray-300 bg-gray-300 p-2 placeholder:text-gray-100 focus:border-primary focus:outline-none"
-                  />
-                  <div className="mt-2 flex flex-row items-center">
-                    <input
-                      type="checkbox"
-                      checked={hasDuration}
-                      onChange={(e) => {
-                        setHasDuration(e.target.checked);
-                      }}
-                      className="h-3 w-3 rounded text-primary"
-                      id="hasDuration"
-                    />
-                    <label
-                      htmlFor="hasDuration"
-                      className="m-auto ml-2 align-bottom text-sm"
-                    >
-                      Has Start/End Date
-                    </label>
-                  </div>
-                  {hasDuration && (
-                    <>
-                      <label
-                        className="text-sm text-slate-200"
-                        htmlFor="startDateDay"
-                      >
-                        Start Date (UTC -7)
-                      </label>
-                      <div className="relative flex justify-start gap-2">
-                        <Input
-                          ref={eventStartDateDayInputRef}
-                          placeholder="DD"
-                          id="startDateDay"
-                          inputDivClassName="w-1/5"
-                          type="number"
-                          className={
-                            errors.startDate
-                              ? "border-red focus:border-red"
-                              : ""
-                          }
-                        />
-                        <Input
-                          ref={eventStartDateMonthInputRef}
-                          placeholder="MM"
-                          inputDivClassName="w-1/5"
-                          type="number"
-                          className={
-                            errors.startDate
-                              ? "border-red focus:border-red"
-                              : ""
-                          }
-                        />
-                        <Input
-                          ref={eventStartDateYearInputRef}
-                          placeholder="YYYY"
-                          inputDivClassName="w-2/5"
-                          type="number"
-                          className={
-                            errors.startDate
-                              ? "border-red focus:border-red"
-                              : ""
-                          }
-                        />
-                        <span
-                          className={`absolute -bottom-1 h-5 text-sm font-semibold text-red ${
-                            errors.startDate ? "" : "invisible"
-                          }`}
-                        >
-                          {errors.startDate}
-                        </span>
-                      </div>
-                      <label
-                        className="text-sm text-slate-200"
-                        htmlFor="endDateDay"
-                      >
-                        End Date (UTC -7)
-                      </label>
-                      <div className="relative flex justify-start gap-2">
-                        <Input
-                          ref={eventEndDateDayInputRef}
-                          placeholder="DD"
-                          id="endDateDay"
-                          inputDivClassName="w-1/5"
-                          type="number"
-                          className={
-                            errors.endDate ? "border-red focus:border-red" : ""
-                          }
-                        />
-                        <Input
-                          ref={eventEndDateMonthInputRef}
-                          placeholder="MM"
-                          inputDivClassName="w-1/5"
-                          type="number"
-                          className={
-                            errors.endDate ? "border-red focus:border-red" : ""
-                          }
-                        />
-                        <Input
-                          ref={eventEndDateYearInputRef}
-                          placeholder="YYYY"
-                          inputDivClassName="w-2/5"
-                          type="number"
-                          className={
-                            errors.endDate ? "border-red focus:border-red" : ""
-                          }
-                        />
-                        <span
-                          className={`absolute -bottom-1 h-5 text-sm font-semibold text-red ${
-                            errors.endDate ? "" : "invisible"
-                          }`}
-                        >
-                          {errors.endDate}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  <Button
-                    type="submit"
-                    className="ml-auto mt-2"
-                    isLoading={isLoading}
-                  >
-                    Add
-                  </Button>
-                </form>
-              </Dialog.Panel>
+                {errors.startDate}
+              </span>
             </div>
-          </Dialog>
+            <label className="text-sm text-slate-200" htmlFor="endDateDay">
+              End Date (UTC -7)
+            </label>
+            <div className="relative flex justify-start gap-2">
+              <Input
+                ref={eventEndDateDayInputRef}
+                placeholder="DD"
+                id="endDateDay"
+                inputDivClassName="w-1/5"
+                type="number"
+                className={errors.endDate ? "border-red focus:border-red" : ""}
+              />
+              <Input
+                ref={eventEndDateMonthInputRef}
+                placeholder="MM"
+                inputDivClassName="w-1/5"
+                type="number"
+                className={errors.endDate ? "border-red focus:border-red" : ""}
+              />
+              <Input
+                ref={eventEndDateYearInputRef}
+                placeholder="YYYY"
+                inputDivClassName="w-2/5"
+                type="number"
+                className={errors.endDate ? "border-red focus:border-red" : ""}
+              />
+              <span
+                className={`absolute -bottom-1 h-5 text-sm font-semibold text-red ${
+                  errors.endDate ? "" : "invisible"
+                }`}
+              >
+                {errors.endDate}
+              </span>
+            </div>
+          </>
         )}
-      </AnimatePresence>
+        <Button type="submit" className="ml-auto mt-2" isLoading={isLoading}>
+          Add
+        </Button>
+      </form>
     </>
   );
 };

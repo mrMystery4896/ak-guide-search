@@ -2,54 +2,23 @@ import { Disclosure, Menu } from "@headlessui/react";
 import type { Variants } from "framer-motion";
 import { motion, AnimatePresence } from "framer-motion";
 import React, { useEffect } from "react";
-import type { Dispatch, SetStateAction } from "react";
 import { FaChevronDown } from "react-icons/fa";
 import type { EventWithChildren } from "../utils/common-types";
 import { RiMenuAddFill } from "react-icons/ri";
 import { BsFillTrashFill, BsThreeDotsVertical } from "react-icons/bs";
 import { MdModeEdit } from "react-icons/md";
-import type { Stage } from "@prisma/client";
 import { TiPlus } from "react-icons/ti";
 import { BiMove } from "react-icons/bi";
+import { useModal } from "../stores/modalStore";
+import DeleteModal from "./DeleteModal";
+import MoveModal from "./MoveModal";
+import EditModal from "./EditModal";
+import AddStageModal from "./AddStageModal";
+import AddEventModal from "./AddEventModal";
 
 interface EventListProps {
   eventList: EventWithChildren[];
   className?: string;
-  setAddEventModalState: Dispatch<
-    SetStateAction<{
-      open: boolean;
-      title: string;
-      parentEventId: string;
-    }>
-  >;
-  setAddStageModalState: Dispatch<
-    SetStateAction<{
-      open: boolean;
-      event?: EventWithChildren;
-    }>
-  >;
-  setEditModalState: Dispatch<
-    SetStateAction<{
-      open: boolean;
-      event?: EventWithChildren;
-      stage?: Stage;
-    }>
-  >;
-  setMoveModalState: Dispatch<
-    SetStateAction<{
-      open: boolean;
-      event?: EventWithChildren;
-      stage?: Stage;
-      eventIdStack: string[];
-    }>
-  >;
-  setDeleteModalState: Dispatch<
-    SetStateAction<{
-      open: boolean;
-      event?: EventWithChildren;
-      stage?: Stage;
-    }>
-  >;
   parentEventIdStack?: string[];
 }
 
@@ -65,14 +34,10 @@ const chevronVariants: Variants = {
 const EventList: React.FC<EventListProps> = ({
   eventList,
   className,
-  setAddEventModalState,
-  setAddStageModalState,
-  setEditModalState,
-  setMoveModalState,
-  setDeleteModalState,
   parentEventIdStack = [], // Used to keep track of the parent event ids for move modal
 }) => {
   const divRef = React.useRef<HTMLDivElement>(null);
+  const modal = useModal();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -171,10 +136,14 @@ const EventList: React.FC<EventListProps> = ({
                                               onClick={() => {
                                                 if (event.stages.length > 0)
                                                   return;
-                                                setAddEventModalState({
-                                                  open: true,
+
+                                                modal.open({
                                                   title: `Add a category under ${event.name}`,
-                                                  parentEventId: event.id,
+                                                  children: (
+                                                    <AddEventModal
+                                                      parentEventId={event.id}
+                                                    />
+                                                  ),
                                                 });
                                                 close();
                                               }}
@@ -199,9 +168,13 @@ const EventList: React.FC<EventListProps> = ({
                                                 active ? "bg-primary" : ""
                                               } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                               onClick={() => {
-                                                setAddStageModalState({
-                                                  open: true,
-                                                  event: event,
+                                                modal.open({
+                                                  title: `Add a stage under ${event.name}`,
+                                                  children: (
+                                                    <AddStageModal
+                                                      event={event}
+                                                    />
+                                                  ),
                                                 });
                                                 close();
                                               }}
@@ -225,10 +198,11 @@ const EventList: React.FC<EventListProps> = ({
                                               active ? "bg-primary" : ""
                                             } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                             onClick={() => {
-                                              setEditModalState({
-                                                open: true,
-                                                event: event,
-                                                stage: undefined,
+                                              modal.open({
+                                                title: `Edit ${event.name}`,
+                                                children: (
+                                                  <EditModal event={event} />
+                                                ),
                                               });
                                               close();
                                             }}
@@ -251,12 +225,16 @@ const EventList: React.FC<EventListProps> = ({
                                               active ? "bg-primary" : ""
                                             } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                             onClick={() => {
-                                              setMoveModalState({
-                                                open: true,
-                                                event: event,
-                                                stage: undefined,
-                                                eventIdStack:
-                                                  parentEventIdStack,
+                                              modal.open({
+                                                title: `Move ${event.name}`,
+                                                children: (
+                                                  <MoveModal
+                                                    event={event}
+                                                    eventIdStack={
+                                                      parentEventIdStack
+                                                    }
+                                                  />
+                                                ),
                                               });
                                               close();
                                             }}
@@ -279,10 +257,11 @@ const EventList: React.FC<EventListProps> = ({
                                               active ? "bg-primary" : ""
                                             } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                             onClick={() => {
-                                              setDeleteModalState({
-                                                open: true,
-                                                event: event,
-                                                stage: undefined,
+                                              modal.open({
+                                                title: `Delete ${event.name}`,
+                                                children: (
+                                                  <DeleteModal event={event} />
+                                                ),
                                               });
                                               close();
                                             }}
@@ -315,11 +294,6 @@ const EventList: React.FC<EventListProps> = ({
                         >
                           <EventList
                             eventList={event.childEvents || []}
-                            setAddEventModalState={setAddEventModalState}
-                            setAddStageModalState={setAddStageModalState}
-                            setEditModalState={setEditModalState}
-                            setMoveModalState={setMoveModalState}
-                            setDeleteModalState={setDeleteModalState}
                             parentEventIdStack={[
                               ...parentEventIdStack,
                               event.id,
@@ -372,10 +346,21 @@ const EventList: React.FC<EventListProps> = ({
                                                             : ""
                                                         } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                                         onClick={() => {
-                                                          setEditModalState({
-                                                            open: true,
-                                                            event: event,
-                                                            stage: stage,
+                                                          modal.open({
+                                                            title: `Edit ${
+                                                              stage.stageCode
+                                                                ? stage.stageCode +
+                                                                  " - "
+                                                                : ""
+                                                            }${
+                                                              stage.stageName
+                                                            }`,
+                                                            children: (
+                                                              <EditModal
+                                                                event={event}
+                                                                stage={stage}
+                                                              />
+                                                            ),
                                                           });
                                                           close();
                                                         }}
@@ -400,12 +385,24 @@ const EventList: React.FC<EventListProps> = ({
                                                             : ""
                                                         } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                                         onClick={() => {
-                                                          setMoveModalState({
-                                                            open: true,
-                                                            event: event,
-                                                            stage: stage,
-                                                            eventIdStack:
-                                                              parentEventIdStack,
+                                                          modal.open({
+                                                            title: `Move ${
+                                                              stage.stageCode
+                                                                ? stage.stageCode +
+                                                                  " - "
+                                                                : ""
+                                                            }${
+                                                              stage.stageName
+                                                            }`,
+                                                            children: (
+                                                              <MoveModal
+                                                                event={event}
+                                                                stage={stage}
+                                                                eventIdStack={
+                                                                  parentEventIdStack
+                                                                }
+                                                              />
+                                                            ),
                                                           });
                                                           close();
                                                         }}
@@ -430,10 +427,21 @@ const EventList: React.FC<EventListProps> = ({
                                                             : ""
                                                         } flex cursor-pointer flex-row items-center gap-1 whitespace-nowrap rounded-md p-2 focus:outline-none md:gap-3`}
                                                         onClick={() => {
-                                                          setDeleteModalState({
-                                                            open: true,
-                                                            event: event,
-                                                            stage: stage,
+                                                          modal.open({
+                                                            title: `Delete ${
+                                                              stage.stageCode
+                                                                ? stage.stageCode +
+                                                                  " - "
+                                                                : ""
+                                                            }${
+                                                              stage.stageName
+                                                            }`,
+                                                            children: (
+                                                              <DeleteModal
+                                                                event={event}
+                                                                stage={stage}
+                                                              />
+                                                            ),
                                                           });
                                                           close();
                                                         }}

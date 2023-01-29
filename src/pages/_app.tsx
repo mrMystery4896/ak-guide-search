@@ -9,6 +9,7 @@ import Layout from "../components/Layout";
 
 import NextNProgress from "nextjs-progressbar";
 import { Toaster } from "react-hot-toast";
+import Modal from "../components/Modal";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -16,6 +17,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
+      <Modal />
       <Toaster
         position="top-right"
         toastOptions={{
